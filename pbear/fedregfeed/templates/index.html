@@ -8,11 +8,27 @@
 
 <body>
 <h1>Polar Bear FedReg Feed</h1>
-{% if request_url %}
+{% if base_url %}
         {% if doc_list %}
             <p>Records {{display_offset|add:1}}-{{display_offset|add:display_num}} of {{total_doc_count}}</P>
             
-        <table width="100%" >
+        <!-- chronological navigation bar -->
+        <div class="nav"> 
+        {% if display_offset > 0 %}
+            <a class="nav" href="{% url fedregfeed.views.index display_offset=0 display_num=display_num %}"><< newest</a>
+            <a class="nav" href="{% url fedregfeed.views.index display_offset=newer_offset display_num=display_num %}">< newer</a>
+        {% else %}
+            <span class="linknotavail"><< newest < newer</span>
+        {% endif %}
+        {% if older_offset < total_doc_count %}
+            <a class="nav" href="{% url fedregfeed.views.index display_offset=older_offset display_num=display_num %}">older ></a>    
+            <a class="nav" href="{% url fedregfeed.views.index display_offset=oldest_offset display_num=display_num %}">oldest >></a>
+        {% else %}
+           <span class="linknotavail"> older > oldest >></span>
+        {% endif %}
+        </div>
+    
+            <table width="100%" >
             <tr>
             <td width="10%"><h2 class="tableheading">Publication Date</h2></td> 
             <td width="15%"><h2 class="tableheading">Agencies</h2></td>
@@ -92,13 +108,7 @@
         
         <H2>count:</H2>
         <p>{{request_return.count}}<p>
-        
-        {% if request_return.next_page_url %}
-            <h2>next_page_url:</H2>
-            <p><a href="{{request_return.next_page_url}}" target="_blank">{{request_return.next_page_url}}</a><p>
-        {% else %}
-            <H2>No next_page_url defined</H2>
-        {% endif %}     
+            
     {% else %}
         <p>no request_return defined</p>
     {% endif %}
@@ -106,7 +116,8 @@
 
 
 
-<!--    <p><strong>request_url</strong>:<a href="{{request_url}}" target="_blank">{{request_url}}</a> </p> -->
+<!--    <p><strong>base_url</strong>:{{base_url}}</p> -->
+<!--    <p><strong>conditions</strong>:{{base_url}}</p> -->
 
 {% else %}
     <p>no request_url defined</p>
