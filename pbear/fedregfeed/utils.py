@@ -2,6 +2,7 @@ from django.contrib.syndication.views import Feed
 from urllib2 import urlopen, quote
 import json
 from fedregfeed.models import FedRegDoc, Agency, SearchResult
+from datetime import datetime, time
 
 class LatestPolarBearUpdate(Feed):
     title="Polar Bear FedReg Feed"
