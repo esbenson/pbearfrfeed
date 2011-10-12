@@ -10,9 +10,9 @@ urlpatterns = patterns('',
     # url(r'^$', 'mmpafeed.views.home', name='home'),
     (r'', include('fedregfeed.urls')),
 
-    url(r'^static/(?P<path>.*)$', 'django.views.static.serve', {
-            'document_root': settings.STATIC_ROOT,
-        }),
+#    url(r'^static/(?P<path>.*)$', 'django.views.static.serve', {
+ #           'document_root': settings.STATIC_ROOT,
+  #      }),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
