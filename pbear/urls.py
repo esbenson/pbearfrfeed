@@ -7,7 +7,7 @@ admin.autodiscover()
 urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'mmpafeed.views.home', name='home'),
-    (r'^fedregfeed/', include('fedregfeed.urls')),
+    (r'', include('fedregfeed.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
