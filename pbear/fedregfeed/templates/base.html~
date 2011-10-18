@@ -1,0 +1,23 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+<title>{% block title %}Polar Bear FedReg Feed{% endblock title %}</title>
+<link rel="stylesheet" href="http://www.etiennebenson.com/static/fedregfeed/css/styles.css" type="text/css">
+</head>
+
+<body>
+{% block header %}
+<h1><a href={% url fedregfeed.views.index %}>Polar Bear FedReg Feed</a></h1>
+{% endblock header %}
+
+{% block content %}
+{% endblock content %}
+
+
+{% block footer %}
+{% endblock footer %}
+
+</body>
+</html>
+

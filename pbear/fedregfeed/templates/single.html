@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+ 
+{% block title %}Polar Bear FedReg Feed Detail View{% endblock title %}
+
+{% block content %}
+        {% if doc %}
+            {% if comment_posted %}
+                <p class="comment_posted">Thank you for your comment!</p>
+            {% endif %}
+
+            <div class = doc_data>
+                 <p>{{doc.document_type}}: {{doc.title}}</p>
+                 <p>{{doc.publication_date}}</p>
+                 <p>{% for a in doc.agencies.all %}
+                    {% if a.name %}{% if a.url %}<a href="{{a.url}}" target="_blank">{{a.name}}</a>{% else %}
+                            {{a.name}}
+                       {% endif %}
+                     {% else %}
+                       {% if a.url %}
+                            <a href="{{a.url}}" target="_blank">{{a.raw_name}}</a>
+                       {% else %}
+                            {{a.raw_name}}
+                       {% endif %}
+                     {% endif %}{% if not forloop.last %}/{% endif %}
+                    {% endfor %}
+                  <p>
+                External links to full text:
+                {% if doc.html_url %}
+                         <a href="{{doc.html_url}}" target=_blank>html</a>
+                    {% endif %}
+                    {% if doc.pdf_url %}
+                                       {% if doc.html_url %}/{% endif %}
+
+                            <a href="{{doc.pdf_url}}" target=_blank>pdf</a>
+                    {% endif %}
+                </p>
+                <P>Abstract:
+                {{ doc.abstract }}</p>
+            </div>
+    
+            <div class=doc_comments>
+                {% load comments %}
+                {% get_comment_count for doc as comment_count %}
+                Comments ({{ comment_count}})
+                {% render_comment_list for doc %}
+                <table>
+                <tr><td>
+                    {% render_comment_form for doc %}
+                </td></tr>
+                </table>    
+
+    
+        {% else %}
+            <p>no doc defined</p>
+        {% endif %}
+
+{% endblock content %}
+

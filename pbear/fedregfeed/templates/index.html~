@@ -49,7 +49,7 @@
                 </td>
                 <td class="doc_type"><p>{{d.document_type}}</p></td>
                 
-                <td class="title"><P><a href="{% url fedregfeed.views.single d.pk %}">{{d.title}}</a></p>     
+                <td class="title"><P><a href="{% url fedregfeed.views.single 1 %}">{{d.title}}</a></p>     
                 </td>
                 
                 <td><p>
