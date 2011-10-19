@@ -57,10 +57,8 @@ def single(request, **kwargs):
         doc_pk=int(kwargs['doc_pk'])
         doc = FedRegDoc.objects.get(pk=doc_pk)
     except KeyError:
-        print "no doc_pk key passed to single view"
         raise Http404
     except FedRegDoc.DoesNotExist:    
-        print "no record exists for given pk in single view", doc_pk
         raise Http404
 
     newer_pk=None
@@ -70,7 +68,6 @@ def single(request, **kwargs):
     q = list(FedRegDoc.objects.order_by('publication_date').filter(publication_date__gte=doc.publication_date).distinct())
     i = 0
     for i in range(len(q)):
-        print "newer: q[i].pk for i=", i, " = ", q[i].pk, "(",len(q),") .... doc_pk:", doc_pk, "doc-date:", doc.publication_date, "qi-date", q[i].publication_date
         if q[i].pk == doc_pk:
             break
     try:
@@ -82,14 +79,12 @@ def single(request, **kwargs):
     q = list(FedRegDoc.objects.order_by('-publication_date').filter(publication_date__lte=doc.publication_date).distinct())
     i = 0
     for i in range(len(q)):
-        print "older: q[i].pk for i=", i, " = ", q[i].pk, "(", len(q),") .... doc_pk:", doc_pk, "doc-date:", doc.publication_date, "qi-date", q[i].publication_date
         if q[i].pk == doc_pk:
             break
     try:
         older_pk = q[i+1].pk
     except IndexError:
-        older_pk = None
-    
+        older_pk = None    
                  
     # render page
     return render_to_response('single.html', {"doc":doc, "comment_posted":comment_posted, "newer_pk":newer_pk, "older_pk":older_pk}, context_instance=RequestContext(request))
