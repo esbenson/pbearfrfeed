@@ -4,7 +4,7 @@
         {% if doc_list %}
             <p>Records {{display_offset|add:1}}-{{display_offset|add:display_num}} of {{total_doc_count}}</P>
             
-        <!-- chronological navigation bar -->
+        <!-- begin chronological navigation bar -->
         <div class="nav"> 
         {% if display_offset > 0 %}
             <a class="nav" href="{% url fedregfeed.views.index display_offset=0 display_num=display_num %}"><< newest</a>
@@ -19,6 +19,7 @@
            <span class="linknotavail"> older > oldest >></span>
         {% endif %}
         </div>
+        <!-- end chronological navigation bar -->
     
             <table width="100%" >
             <tr>
@@ -49,7 +50,7 @@
                 </td>
                 <td class="doc_type"><p>{{d.document_type}}</p></td>
                 
-                <td class="title"><P><a href="{% url fedregfeed.views.single 1 %}">{{d.title}}</a></p>     
+                <td class="title"><P><a href="{% url fedregfeed.views.single d.pk %}">{{d.title}}</a></p>     
                 </td>
                 
                 <td><p>
@@ -66,7 +67,7 @@
              </table>
 
 
-            <!-- chronological navigation bar -->
+            <!-- begin chronological navigation bar -->
             <div class="nav"> 
             {% if display_offset > 0 %}
                 <a class="nav" href="{% url fedregfeed.views.index display_offset=0 display_num=display_num %}"><< newest</a>
@@ -81,6 +82,8 @@
                <span class="linknotavail"> older > oldest >></span>
             {% endif %}
             </div>
+            <!-- end chronological navigation bar -->
+
     
         {% else %}
             <p>no doc_list defined</p>

@@ -42,10 +42,17 @@ def index(request, **kwargs):
 
 
 # --------------------------------------------------------------------------------------------------------------
-# the single view shows details for a single fedreg document (which is already in the database)
-# --------------------------------------------------------------------------------------------------------------
+# the single view shows details for a single fedreg document based on pk number (which is already in the database)
+# -----------------------------------------------------------------------------------------------------------
 def single(request, **kwargs):
 
+    # set comment flag if this page being called after comment posted, so that "thanks" is displayed
+    try:
+        comment_posted=kwargs['comment']
+    except KeyError:
+        comment_posted=False
+
+    # try to get the document obj to be displayed based on primary key passed in as arg
     try:
         doc_pk=int(kwargs['doc_pk'])
         doc = FedRegDoc.objects.get(pk=doc_pk)
@@ -55,13 +62,37 @@ def single(request, **kwargs):
     except FedRegDoc.DoesNotExist:    
         print "no record exists for given pk in single view", doc_pk
         raise Http404
-        
+
+    newer_pk=None
+    older_pk=None
+
+    # find primary key for nav to newer record
+    q = list(FedRegDoc.objects.order_by('publication_date').filter(publication_date__gte=doc.publication_date).distinct())
+    i = 0
+    for i in range(len(q)):
+        print "newer: q[i].pk for i=", i, " = ", q[i].pk, "(",len(q),") .... doc_pk:", doc_pk, "doc-date:", doc.publication_date, "qi-date", q[i].publication_date
+        if q[i].pk == doc_pk:
+            break
     try:
-        comment_posted=kwargs['comment']
-    except KeyError:
-        comment_posted=False
+        newer_pk = q[i+1].pk
+    except IndexError:
+        newer_pk = None
         
-    return render_to_response('single.html', {"doc":doc, "comment_posted":comment_posted}, context_instance=RequestContext(request))
+    # find primary key for nav to older record
+    q = list(FedRegDoc.objects.order_by('-publication_date').filter(publication_date__lte=doc.publication_date).distinct())
+    i = 0
+    for i in range(len(q)):
+        print "older: q[i].pk for i=", i, " = ", q[i].pk, "(", len(q),") .... doc_pk:", doc_pk, "doc-date:", doc.publication_date, "qi-date", q[i].publication_date
+        if q[i].pk == doc_pk:
+            break
+    try:
+        older_pk = q[i+1].pk
+    except IndexError:
+        older_pk = None
+    
+                 
+    # render page
+    return render_to_response('single.html', {"doc":doc, "comment_posted":comment_posted, "newer_pk":newer_pk, "older_pk":older_pk}, context_instance=RequestContext(request))
 
 
 
