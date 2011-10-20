@@ -12,6 +12,7 @@
 <td width="100%" colspan="3" style="text-align:center">
 {% block header %}
 <h1 id="title"><a href={% url pbear_list_default %}>Polar Bear Feed</a></h1>
+<p><a href="http://www.etiennebenson.com/polar-bears-in-the-federal-register">about</a></p>
 {% endblock header %}
 </td>
 </tr>

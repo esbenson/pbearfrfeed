@@ -67,7 +67,7 @@
                     </span>
                 </p>
                
-                <P class="doc_abstract">{{ doc.abstract }}</p>
+                <P class="doc_abstract">Abstract: {{ doc.abstract }}</p>
             </div>
         {% else %}
             <p>no doc defined</p>
