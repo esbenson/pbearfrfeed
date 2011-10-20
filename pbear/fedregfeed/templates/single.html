@@ -1,6 +1,32 @@
 {% extends "base.html" %}
  
-{% block title %}Polar Bear Feed: Detail View{% endblock title %}
+{% block title %}Polar Bear Feed: Single View{% endblock title %}
+
+{% block navigation %}
+            {% if newest_pk %} 
+                <a href="{% url pbear_single_pk doc_pk=newest_pk %}">newest</a>
+            {% else %}
+                newest
+            {% endif %}
+            {% if newer_pk %} 
+                <a href="{% url pbear_single_pk doc_pk=newer_pk %}">newer</a>
+            {% else %}
+                newer
+            {% endif %}
+            
+            <a href="{% url pbear_list doc_pk=doc.pk %}">list</a>
+
+            {% if older_pk %} 
+                <a href="{% url pbear_single_pk doc_pk=older_pk %}">older</a>
+            {% else %}
+                older 
+            {% endif %}
+            {% if oldest_pk %} 
+                <a href="{% url pbear_single_pk doc_pk=oldest_pk %}">oldest</a>
+            {% else %}
+                oldest
+            {% endif %}
+{% endblock navigation %}
 
 {% block content %}
         {% if doc %}
@@ -8,17 +34,6 @@
                 <p class="comment_posted"><em>Thank you for your comment!</em></p>
             {% endif %}
             
-            {% if older_pk %} 
-                <a href="{% url pbear_single_pk doc_pk=older_pk %}">older</a>
-            {% else %}
-                older
-            {% endif %}
-            
-            {% if newer_pk %} 
-                <a href="{% url pbear_single_pk doc_pk=newer_pk %}">newer</a>
-            {% else %}
-                newer
-            {% endif %}
             
             <div class = doc_data>
                  <p>{{doc.document_type}}: {{doc.title}}</p>

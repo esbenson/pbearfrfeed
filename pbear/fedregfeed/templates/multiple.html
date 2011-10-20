@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block navigation %}
+            <div class="nav"> 
+            {% if display_offset > 0 %}
+                <a class="nav" href="{% url pbear_list doc_pk=newest_pk  %}"><< newest</a>
+                <a class="nav" href="{% url pbear_list doc_pk=newer_pk  %}">< newer</a>
+            {% else %}
+                <span class="linknotavail"><< newest < newer</span>
+            {% endif %}
+            {% if older_offset < total_doc_count %}
+                <a class="nav" href="{% url pbear_list doc_pk=older_pk   %}">older ></a>    
+                <a class="nav" href="{% url pbear_list doc_pk=oldest_pk  %}">oldest >></a>
+            {% else %}
+               <span class="linknotavail"> older > oldest >></span>
+            {% endif %}
+            </div>
+{% endblock navigation %}
+
+
+{% block content %}
+        {% if doc_list %}
+            <p>Records {{display_offset|add:1}}-{{display_offset|add:display_num}} of {{total_doc_count}}</P>
+
+            
+
+        
+            <table width="100%" >
+            <tr>
+            <td width="10%"><h2 class="tableheading">Publication Date</h2></td> 
+            <td width="15%"><h2 class="tableheading">Agencies</h2></td>
+            <td width="10%"><h2 class="tableheading">Document Type</h2></td>
+            <td><h2 class="tableheading">Title</h2></td>
+            <td width="5%"><h2 class="tableheading">Full Text</h2></td> 
+            </tr>
+            
+            {% for d in doc_list %}    
+                <tr>
+                <td><p>{{d.publication_date}}</p></td>
+                <td class="agency"><p>
+                       <p>{% for a in d.agencies.all %}
+                            {% if a.name %}{% if a.url %}<a href="{{a.url}}" target="_blank">{{a.name}}</a>{% else %}
+                                    {{a.name}}
+                               {% endif %}
+                            {% else %}
+                               {% if a.url %}
+                                    <a href="{{a.url}}" target="_blank">{{a.raw_name}}</a>
+                               {% else %}
+                                    {{a.raw_name}}
+                               {% endif %}
+                            {% endif %}{% if not forloop.last %}/{% endif %}
+                         {% endfor %}
+                   </p>
+                </td>
+                <td class="doc_type"><p>{{d.document_type}}</p></td>
+                
+                <td class="title"><P><a href="{% url fedregfeed.views.single d.pk %}">{{d.title}}</a></p>     
+                </td>
+                
+                <td><p>
+                {% if d.html_url %}
+                         <a href="{{d.html_url}}" target=_blank>html</a><br/>
+                    {% endif %}
+                    {% if d.pdf_url %}
+                       <a href="{{d.pdf_url}}" target=_blank>pdf</a>
+                    {% endif %}
+                </p></td>
+              
+             </tr>
+             {% endfor %}   
+             </table>
+
+
+    
+        {% else %}
+            <p>no doc_list defined</p>
+        {% endif %}
+
+{% endblock content %}

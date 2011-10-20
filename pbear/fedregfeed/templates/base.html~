@@ -2,18 +2,21 @@
 <html>
 
 <head>
-<title>{% block title %}Polar Bear FedReg Feed{% endblock title %}</title>
+<title>{% block title %}Polar Bear Feed{% endblock title %}</title>
 <link rel="stylesheet" href="http://www.etiennebenson.com/static/fedregfeed/css/styles.css" type="text/css">
+
 </head>
 
 <body>
 {% block header %}
-<h1><a href={% url fedregfeed.views.index %}>Polar Bear FedReg Feed</a></h1>
+<h1 id="title"><a href={% url pbear_single_default %}>Polar Bear Feed</a></h1>
 {% endblock header %}
+
+{% block navigation %}
+{% endblock navigation %}
 
 {% block content %}
 {% endblock content %}
-
 
 {% block footer %}
 {% endblock footer %}
