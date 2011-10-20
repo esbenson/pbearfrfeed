@@ -1,79 +1,78 @@
 {% extends "base.html" %}
 
-{% block navigation %}
-            <div class="nav"> 
-            {% if display_offset > 0 %}
-                <a class="nav" href="{% url pbear_list doc_pk=newest_pk  %}"><< newest</a>
-                <a class="nav" href="{% url pbear_list doc_pk=newer_pk  %}">< newer</a>
+{% block newnav %}
+            {% if newer_pk %} 
+                <a class="nav" href="{% url pbear_list doc_pk=newer_pk  %}">&larr;newer</a>
             {% else %}
-                <span class="linknotavail"><< newest < newer</span>
+                &larr;newer
             {% endif %}
-            {% if older_offset < total_doc_count %}
-                <a class="nav" href="{% url pbear_list doc_pk=older_pk   %}">older ></a>    
-                <a class="nav" href="{% url pbear_list doc_pk=oldest_pk  %}">oldest >></a>
+            {% if newest_pk %} 
+                <a class="nav" href="{% url pbear_list doc_pk=newest_pk  %}">&larr;&larr;newest</a>
             {% else %}
-               <span class="linknotavail"> older > oldest >></span>
+                &larr;newest
             {% endif %}
-            </div>
-{% endblock navigation %}
+{% endblock newnav %}
+
+{% block listnav %}
+            <p>records {{display_offset|add:1}}-{{display_offset|add:display_num}} of {{total_doc_count}}</P>
+{% endblock listnav %}
+
+{% block oldnav %}
+            {% if older_pk %} 
+                <a class="nav" href="{% url pbear_list doc_pk=older_pk   %}">older&rarr;</a>    
+            {% else %}
+                older&rarr;
+            {% endif %}
+            {% if oldest_pk %} 
+                <a class="nav" href="{% url pbear_list doc_pk=oldest_pk  %}">oldest&rarr;&rarr;</a>
+            {% else %}
+                oldest&rarr;&rarr;
+            {% endif %}
+{% endblock oldnav %}
 
 
 {% block content %}
-        {% if doc_list %}
-            <p>Records {{display_offset|add:1}}-{{display_offset|add:display_num}} of {{total_doc_count}}</P>
+        {% if doc_list %}            
+            {% load comments %}
 
-            
 
-        
-            <table width="100%" >
-            <tr>
-            <td width="10%"><h2 class="tableheading">Publication Date</h2></td> 
-            <td width="15%"><h2 class="tableheading">Agencies</h2></td>
-            <td width="10%"><h2 class="tableheading">Document Type</h2></td>
-            <td><h2 class="tableheading">Title</h2></td>
-            <td width="5%"><h2 class="tableheading">Full Text</h2></td> 
-            </tr>
-            
-            {% for d in doc_list %}    
-                <tr>
-                <td><p>{{d.publication_date}}</p></td>
-                <td class="agency"><p>
-                       <p>{% for a in d.agencies.all %}
-                            {% if a.name %}{% if a.url %}<a href="{{a.url}}" target="_blank">{{a.name}}</a>{% else %}
-                                    {{a.name}}
-                               {% endif %}
-                            {% else %}
-                               {% if a.url %}
-                                    <a href="{{a.url}}" target="_blank">{{a.raw_name}}</a>
-                               {% else %}
-                                    {{a.raw_name}}
-                               {% endif %}
-                            {% endif %}{% if not forloop.last %}/{% endif %}
-                         {% endfor %}
-                   </p>
-                </td>
-                <td class="doc_type"><p>{{d.document_type}}</p></td>
-                
-                <td class="title"><P><a href="{% url fedregfeed.views.single d.pk %}">{{d.title}}</a></p>     
-                </td>
-                
-                <td><p>
-                {% if d.html_url %}
-                         <a href="{{d.html_url}}" target=_blank>html</a><br/>
+            {% for doc in doc_list %}    
+                   
+             <p class = "doc_data">
+                 <span class="doc_title" style="font-size:14px;font-weight:bold;" ><a href="{% url pbear_single_pk doc_pk=doc.pk %}">{{doc.title}}</a></span> &bull;  
+                 <span class="doc_date">{{doc.publication_date}}</span> &bull;
+                 <span class="doc_type">{{doc.document_type}}</span> &bull;  
+                 <span class="doc_agency">
+                 {% for a in doc.agencies.all %}
+                    {% if a.name %}
+                        {{a.name}}
+                        {% if a.url %}<a href="{{a.url}}" target="_blank">&rArr;</a>
+                        {% else %}
+                       {% endif %}
+                     {% else %}
+                       {{a.raw_name}}
+                       {% if a.url %}
+                            <a href="{{a.url}}" target="_blank">&rArr;</a>
+                       {% endif %}
+                     {% endif %}
+                    {% endfor %}
+                 &bull; <span class="doc_fulltext">Full text:{% if doc.html_url %} 
+                  </span>
+                     HTML<a href="{{doc.html_url}}" target=_blank>&rArr;</a>
                     {% endif %}
-                    {% if d.pdf_url %}
-                       <a href="{{d.pdf_url}}" target=_blank>pdf</a>
+                    {% if doc.pdf_url %}
+                         PDF<a href="{{doc.pdf_url}}" target=_blank>&rArr;</a>
                     {% endif %}
-                </p></td>
-              
-             </tr>
-             {% endfor %}   
-             </table>
 
-
-    
+                    </span>
+            {% get_comment_count for doc as comment_count %}
+                 &bull; <span class="doc_comments_heading">Comments ({{comment_count}})</span>
+               </p>
+            
+            {% endfor %}
+            
         {% else %}
-            <p>no doc_list defined</p>
+            <p>nothing found</p>
         {% endif %}
 
 {% endblock content %}

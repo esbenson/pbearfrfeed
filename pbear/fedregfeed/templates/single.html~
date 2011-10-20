@@ -2,31 +2,35 @@
  
 {% block title %}Polar Bear Feed: Single View{% endblock title %}
 
-{% block navigation %}
-            {% if newest_pk %} 
-                <a href="{% url pbear_single_pk doc_pk=newest_pk %}">newest</a>
-            {% else %}
-                newest
-            {% endif %}
+{% block newnav %}
             {% if newer_pk %} 
-                <a href="{% url pbear_single_pk doc_pk=newer_pk %}">newer</a>
+                <a href="{% url pbear_single_pk doc_pk=newer_pk %}">&larr;newer</a>
             {% else %}
-                newer
+                &larr;newer
             {% endif %}
-            
-            <a href="{% url pbear_list doc_pk=doc.pk %}">list</a>
-
-            {% if older_pk %} 
-                <a href="{% url pbear_single_pk doc_pk=older_pk %}">older</a>
+            {% if newest_pk %} 
+                <a href="{% url pbear_single_pk doc_pk=newest_pk %}">&larr;&larr;newest</a>
             {% else %}
-                older 
+                &larr;&larr;newest
+            {% endif %}
+{% endblock newnav %}
+
+{% block listnav %}
+            <a href="{% url pbear_list doc_pk=doc.pk %}">list</a>
+{% endblock listnav %}
+
+{% block oldnav %}
+            {% if older_pk %} 
+                <a href="{% url pbear_single_pk doc_pk=older_pk %}">older&rarr;</a>
+            {% else %}
+                older&rarr;
             {% endif %}
             {% if oldest_pk %} 
-                <a href="{% url pbear_single_pk doc_pk=oldest_pk %}">older</a>
+                <a href="{% url pbear_single_pk doc_pk=oldest_pk %}">oldest&rarr;&rarr;</a>
             {% else %}
-                oldest
+                oldest&rarr;&rarr;
             {% endif %}
-{% endblock navigation %}
+{% endblock oldnav %}
 
 {% block content %}
         {% if doc %}
@@ -34,52 +38,58 @@
                 <p class="comment_posted"><em>Thank you for your comment!</em></p>
             {% endif %}
             
-            
-            <div class = doc_data>
-                 <p>{{doc.document_type}}: {{doc.title}}</p>
-                 <p>{{doc.publication_date}}</p>
-                 <p>{% for a in doc.agencies.all %}
-                    {% if a.name %}{% if a.url %}<a href="{{a.url}}" target="_blank">{{a.name}}</a>{% else %}
-                            {{a.name}}
+             <p class = "doc_data">
+                 <span class="doc_title" style="font-size:14px;font-weight:bold;" >{{doc.title}}</span> &bull;  
+                 <span class="doc_date">{{doc.publication_date}}</span> &bull;
+                 <span class="doc_type">{{doc.document_type}}</span> &bull;  
+                 <span class="doc_agency">
+                 {% for a in doc.agencies.all %}
+                    {% if a.name %}
+                        {{a.name}}
+                        {% if a.url %}<a href="{{a.url}}" target="_blank">&rArr;</a>
+                        {% else %}
                        {% endif %}
                      {% else %}
+                       {{a.raw_name}}
                        {% if a.url %}
-                            <a href="{{a.url}}" target="_blank">{{a.raw_name}}</a>
-                       {% else %}
-                            {{a.raw_name}}
+                            <a href="{{a.url}}" target="_blank">&rArr;</a>
                        {% endif %}
                      {% endif %}
                     {% endfor %}
-                  <p>
-                External links to full text:
-                {% if doc.html_url %}
-                         <a href="{{doc.html_url}}" target=_blank>html</a>
+                  </span>
+                &bull; <span class="doc_fulltext"> Full text:{% if doc.html_url %}
+                     HTML<a href="{{doc.html_url}}" target=_blank>&rArr;</a>
                     {% endif %}
                     {% if doc.pdf_url %}
-                                       {% if doc.html_url %}/{% endif %}
-
-                            <a href="{{doc.pdf_url}}" target=_blank>pdf</a>
+                         PDF<a href="{{doc.pdf_url}}" target=_blank>&rArr;</a>
                     {% endif %}
-                </p>
-                <P>Abstract:
-                {{ doc.abstract }}</p>
-            </div>
-    
-            <div class=doc_comments>
-                {% load comments %}
-                {% get_comment_count for doc as comment_count %}
-                Comments ({{ comment_count}})
-                {% render_comment_list for doc %}
-                <table>
-                <tr><td>
-                    {% render_comment_form for doc %}
-                </td></tr>
-                </table>    
 
-    
+                    </span>
+                </p>
+               
+                <P class="doc_abstract">{{ doc.abstract }}</p>
+            </div>
         {% else %}
             <p>no doc defined</p>
         {% endif %}
 
 {% endblock content %}
+
+    
+{% block comments %}
+            <div class=doc_comments>
+                {% load comments %}
+                {% get_comment_count for doc as comment_count %}
+                <span class="doc_comments_heading">Comments ({{comment_count}})</span>
+                {% render_comment_list for doc %}
+                <table>
+                <p>Post a comment:</p>
+                <tr><td>
+                    {% render_comment_form for doc %}
+                </td></tr>
+                </table> 
+             </div> 
+{% endblock comments %}
+    
+
 

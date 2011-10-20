@@ -4,22 +4,58 @@
 <head>
 <title>{% block title %}Polar Bear Feed{% endblock title %}</title>
 <link rel="stylesheet" href="http://www.etiennebenson.com/static/fedregfeed/css/styles.css" type="text/css">
-
 </head>
 
 <body>
+<table style="margin-left:auto; margin-right:auto" width="900">
+<tr>
+<td width="100%" colspan="3" style="text-align:center">
 {% block header %}
 <h1 id="title"><a href={% url pbear_single_default %}>Polar Bear Feed</a></h1>
 {% endblock header %}
+</td>
+</tr>
 
-{% block navigation %}
-{% endblock navigation %}
+<tr>
+<td width="75" style="text-align:left">
+{% block newnav %}
+{% endblock newnav %}
+</td>
+<td width="750"  align="center" style="text-align:center">
+{% block listnav %}
+{% endblock listnav %}
+</td> 
+<td width="75" style="text-align:right">
+{% block oldnav %}
+{% endblock oldnav %}
+</td>
+</tr>
 
+
+<tr>
+<td></td>
+<td width="80%">
 {% block content %}
 {% endblock content %}
+</td>
+<td></td>
+</tr>
 
+<tr>
+<td></td>
+<td width="80%">
+{% block comments %}
+{% endblock comments %}
+</td>
+<td></td>
+</tr>
+
+
+<tr>
+<td width="100%" colspan=3>
 {% block footer %}
 {% endblock footer %}
+</td>
 
 </body>
 </html>
