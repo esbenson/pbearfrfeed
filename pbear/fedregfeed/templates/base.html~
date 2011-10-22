@@ -12,7 +12,8 @@
 <td width="100%" colspan="3" style="text-align:center">
 {% block header %}
 <h1 id="title"><a href={% url pbear_list_default %}>Polar Bear Feed</a></h1>
-<p><a href="http://www.etiennebenson.com/polar-bears-in-the-federal-register">about</a></p>
+<p style="font-style:italic">an automatically updated, commentable,  <a href="/feed" target="_blank" style="text-decoration:none">RSS-syndicated</a> list of <a href="http://www.federalregister.gov" target="_blank" style="text-decoration:none">Federal Register</a> items mentioning polar bears, 1994-present</p>
+<p><a href="http://www.etiennebenson.com/polar-bears-in-the-federal-register" target="_blank">about</a></p>
 {% endblock header %}
 </td>
 </tr>
