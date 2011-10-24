@@ -2,7 +2,7 @@ from django.shortcuts import render_to_response, get_object_or_404, get_list_or_
 from django.core import serializers
 from django.http import Http404
 from django.template import RequestContext
-from fedregfeed.models import FedRegDoc, Agency, SearchResult
+from fedregfeed.models import FedRegDoc, Agency
 from utils import update_database_from_fedreg
     
 
@@ -36,18 +36,26 @@ def multiple(request, **kwargs):
             conditions = conditions
         # update the database 
         request_return = update_database_from_fedreg(base_url, conditions)
+        # get the pk of the newest item by pub date
         doc_list = FedRegDoc.objects.order_by('-publication_date')
         doc_pk = doc_list[0].pk
         display_offset = 0
         total_doc_count = FedRegDoc.objects.count()        
 
-    
-    newest_pk = doc_list[0].pk
-    newer_pk = doc_list[max(0, display_offset - display_num)].pk
-    oldest_pk = doc_list[max(0, total_doc_count - display_num)].pk
-    if (display_offset + display_num) > total_doc_count:
+    # set nav parameters
+    if display_offset < display_num:
+        newest_pk=None
+        newer_pk=None
+    else:
+        newest_pk = doc_list[0].pk
+        newer_pk = doc_list[max(0, display_offset - display_num)].pk
+    if (display_offset + display_num) >= total_doc_count:
         display_num = total_doc_count - display_offset + 1
-    older_pk = doc_list[min(total_doc_count - 1, display_offset + display_num)].pk
+        older_pk = None
+        oldest_pk = None
+    else:    
+        older_pk = doc_list[min(total_doc_count - 1, display_offset + display_num)].pk
+        oldest_pk = doc_list[max(0, total_doc_count - display_num)].pk
     
     doc_list=doc_list[display_offset:(display_offset + display_num)]
 
