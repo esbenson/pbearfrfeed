@@ -23,7 +23,7 @@ def multiple(request, **kwargs):
        total_doc_count = FedRegDoc.objects.count()
        for display_offset in range(total_doc_count):
            if doc_list[display_offset].pk == doc_pk:
-               break     
+               break
     except KeyError:
         # if no 'doc_pk' was given, then update database and get the most recent by publication date
         base_url = 'http://api.federalregister.gov/v1/articles.json'

@@ -117,7 +117,9 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+#   my apps
     'fedregfeed',
+    'fedregchart',
 #    'fedregfeedcomments', # see COMMENTS_APP parameter below
     'south',
     # Uncomment the next line to enable the admin:
