@@ -35,11 +35,11 @@
 {% block content %}
         {% if doc %}
             {% if comment_posted %}
-                <p class="comment_posted"><em>Thank you for your comment!</em></p>
+                <div style="margin-left:auto;margin-right:auto;width:200px;"><p class="comment_posted" style="font-weight:bold; color:#0000cc"><em>Thank you for your comment!</em></p></div>
             {% endif %}
             
              <p class = "doc_data">
-                 <span class="doc_title" style="font-size:14px;font-weight:bold;" >{{doc.title}}</span> &bull;  
+                 <span class="doc_title" style="font-size:14px;font-weight:bold;" >{{doc.title}}</span> <br/> 
                  <span class="doc_date">{{doc.publication_date}}</span> &bull;
                  <span class="doc_type">{{doc.document_type}}</span> &bull;  
                  <span class="doc_agency">
@@ -67,7 +67,7 @@
                     </span>
                 </p>
                
-                <P class="doc_abstract">Abstract: {{ doc.abstract }}</p>
+                <P class="doc_abstract"><span style="font-weight:bold">Abstract</span>: {{ doc.abstract }}</p>
             </div>
         {% else %}
             <p>no doc defined</p>
@@ -80,7 +80,7 @@
             <div class=doc_comments>
                 {% load comments %}
                 {% get_comment_count for doc as comment_count %}
-                <span class="doc_comments_heading">Comments ({{comment_count}})</span>
+                <span class="doc_comments_heading"><span style="font-weight:bold">Comments</span>: {{comment_count}}</span>
                 {% render_comment_list for doc %}
                 <table>
                 <p>Post a comment:</p>

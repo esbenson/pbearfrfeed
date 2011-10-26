@@ -9,7 +9,7 @@
             {% if newest_pk %} 
                 <a class="nav" href="{% url pbear_list doc_pk=newest_pk  %}">&larr;&larr;newest</a>
             {% else %}
-                &larr;newest
+                &larr;&larr;newest
             {% endif %}
 {% endblock newnav %}
 
@@ -39,7 +39,7 @@
             {% for doc in doc_list %}    
                    
              <p class = "doc_data">
-                 <span class="doc_title" style="font-size:14px;font-weight:bold;" ><a href="{% url pbear_single_pk doc_pk=doc.pk %}">{{doc.title}}</a></span> &bull;  
+                 <span class="doc_title" style="font-weight:bold;" ><a href="{% url pbear_single_pk doc_pk=doc.pk %}">{{doc.title}}</a></span> <br/>  
                  <span class="doc_date">{{doc.publication_date}}</span> &bull;
                  <span class="doc_type">{{doc.document_type}}</span> &bull;  
                  <span class="doc_agency">
@@ -66,7 +66,7 @@
 
                     </span>
             {% get_comment_count for doc as comment_count %}
-                 &bull; <span class="doc_comments_heading">Comments ({{comment_count}})</span>
+                 &bull; <span class="doc_comments_heading">Comments: {{comment_count}}</span>
                </p>
             
             {% endfor %}

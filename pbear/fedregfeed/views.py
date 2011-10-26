@@ -4,11 +4,11 @@ from django.http import Http404
 from django.template import RequestContext
 
 from fedregfeed.models import FedRegDoc, Agency
-from utils import update_database_from_fedreg, generate_chart_url
+from utils import update_database_from_fedreg, generate_chart_url_from_fedreg, generate_chart_url_from_local
 
 
 # --------------------------------------------------------------------------------------------------------------
-# the list view shows a list of records in the database
+# the multiple view shows a list of records in the database
 # --------------------------------------------------------------------------------------------------------------
 def multiple(request, **kwargs):
     
@@ -44,7 +44,7 @@ def multiple(request, **kwargs):
         total_doc_count = FedRegDoc.objects.count()        
 
     # set nav parameters
-    if display_offset < display_num:
+    if display_offset == 0:
         newest_pk=None
         newer_pk=None
     else:
@@ -71,19 +71,26 @@ def multiple(request, **kwargs):
 # --------------------------------------------------------------------------------------------------------------
 def single(request, **kwargs):
 
-    # set comment flag if this page being called after comment posted, so that "thanks" is displayed
-    try:
-        comment_posted=kwargs['comment']
-    except KeyError:
-        comment_posted=False
+    comment_posted = False
+    doc_pk = None
 
-    # try to get the document obj to be displayed based on primary key passed in as arg
-    try:
-        doc_pk=int(kwargs['doc_pk'])
-        doc = FedRegDoc.objects.get(pk=doc_pk)
-    except KeyError:
-        print "no doc_pk given to single view - showing first by publication date"
-        doc = FedRegDoc.objects.order_by('-publication_date')[0]
+    # get arguments from kwargs
+    for k,v in kwargs.iteritems():
+        if k == 'comment':
+            comment_posted = v
+        elif k == 'doc_pk':
+            doc_pk = int(v)
+        else:
+            print "invalid argument - ", k, " - passed to single"
+            raise Http404
+
+    # get doc from database 
+    try: 
+        if not doc_pk:
+            print "no doc_pk given to single view - showing first by publication date"
+            doc = FedRegDoc.objects.order_by('-publication_date')[0]
+        else:
+            doc = FedRegDoc.objects.get(pk=doc_pk)
     except FedRegDoc.DoesNotExist:
         raise Http404
 
@@ -129,9 +136,22 @@ def single(request, **kwargs):
 #   pbear chart
 #-------------------------------------------------------------
 def pbear_chart(request, **kwargs):
-    search_term = kwargs['search_term']
-    end_year = kwargs['end_year']
-    start_year = kwargs['start_year']
-    chart_url = generate_chart_url(search_term, start_year, end_year)
+
+    for k,v in kwargs.iteritems():  
+        print k, v
+        if k=='search_term':
+            search_term = v
+        elif k=='end_year':
+            end_year = int(v)
+        elif k=='start_year': 
+            start_year = int(v)
+        else:
+            print "invalid argument - ", k, " - passed to pbear_chart"
+            raise Http404
+
+#    chart_url = generate_chart_url_from_fedreg(search_term, start_year, end_year) # generate from fedreg API
+    month_flag = False
+    chart_url = generate_chart_url_from_local(search_term, start_year, end_year, month_flag)  # generate from local database
      
     return render_to_response('chart.html', {"chart_url": chart_url, "search_term":search_term, "end_year":end_year, "start_year":start_year}, context_instance=RequestContext(request))
+    
