@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+ 
+{% block title %}Polar Bear Feed: Chart View{% endblock title %}
+
+{% block listnav %}
+    <a href="{% url pbear_list_default  %}">list view</a>
+{% endblock listnav %}
+
+{% block content %}
+    <div style="margin-left:auto; margin-right:auto; width:600px;text-align:center;">
+        <h2># of Polar Bear Items in FR / Year</h2>
+        <img src="{{ chart_url }}"/>
+    </div>
+{% endblock content %}
+
+    
+

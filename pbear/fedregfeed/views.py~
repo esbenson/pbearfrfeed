@@ -2,9 +2,10 @@ from django.shortcuts import render_to_response, get_object_or_404, get_list_or_
 from django.core import serializers
 from django.http import Http404
 from django.template import RequestContext
+
 from fedregfeed.models import FedRegDoc, Agency
-from utils import update_database_from_fedreg
-    
+from utils import update_database_from_fedreg, generate_chart_url
+
 
 # --------------------------------------------------------------------------------------------------------------
 # the list view shows a list of records in the database
@@ -124,4 +125,13 @@ def single(request, **kwargs):
     return render_to_response('single.html', {"doc":doc, "comment_posted":comment_posted, "newer_pk":newer_pk, "older_pk":older_pk, "newest_pk":newest_pk, "oldest_pk":oldest_pk}, context_instance=RequestContext(request))
 
 
-
+#-----------------------------------------------------------
+#   pbear chart
+#-------------------------------------------------------------
+def pbear_chart(request, **kwargs):
+    search_term = kwargs['search_term']
+    end_year = kwargs['end_year']
+    start_year = kwargs['start_year']
+    chart_url = generate_chart_url(search_term, start_year, end_year)
+     
+    return render_to_response('chart.html', {"chart_url": chart_url, "search_term":search_term, "end_year":end_year, "start_year":start_year}, context_instance=RequestContext(request))

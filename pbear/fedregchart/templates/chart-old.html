@@ -1,0 +1,22 @@
+<html>
+<head><title>RegChart</title></head>
+<body>
+<h1>RegChart</h1>
+
+<!-- form to input search term -->
+<form action="/chart/" method="post">
+{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="Show Chart" />
+</form>
+<!-- end input form -->
+
+<!-- display of chart -->
+{% if search_term %}
+<h2>Search Term: {{ search_term}}</h2>
+<img src="{{ chart_url }}"/>
+{% endif %}
+<!-- end display of chart -->
+
+</body>
+</html>

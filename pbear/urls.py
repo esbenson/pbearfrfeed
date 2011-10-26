@@ -9,7 +9,7 @@ urlpatterns = patterns('',
     # Examples:
     # url(r'^$', 'mmpafeed.views.home', name='home'),
     (r'', include('fedregfeed.urls')),
-    (r'^chart/', include('fedregchart.urls')),
+    #    (r'^chart/', include('fedregchart.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
     # url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
