@@ -1,5 +1,4 @@
 from django.contrib.syndication.views import Feed
-
 from urllib2 import urlopen, quote
 import json
 import datetime
@@ -143,7 +142,7 @@ class LatestPolarBearUpdate(Feed):
         return item.html_url
         
     def item_pubdate(self, item):
-        return datetime.combine(item.publication_date, time())
+        return datetime.datetime.combine(item.publication_date, datetime.time())
         
     def item_categories(self, item):
         return item.document_type

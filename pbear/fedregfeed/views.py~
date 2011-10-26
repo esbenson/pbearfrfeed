@@ -7,8 +7,34 @@ from fedregfeed.models import FedRegDoc, Agency
 from utils import update_database_from_fedreg, generate_chart_url_from_fedreg, generate_chart_url_from_local
 
 
+# -----------------------------------------------------------      
+#      for the RSS feed
+# -----------------------------------------------------------      
+class LatestPolarBearUpdate(Feed):
+    title="Polar Bear FedReg Feed"
+    link="/feed/"
+    description="Latest notices, rules, and proposed rules from the U.S. Federal Register featuring polar bears." 
+    
+    def items(self):
+        return FedRegDoc.objects.order_by('-publication_date')[:5]
+
+    def item_title(self, item):
+        return item.title
+
+    def item_description(self, item):
+        return item.abstract
+        
+    def item_link(self, item):
+        return item.html_url
+        
+    def item_pubdate(self, item):
+        return datetime.combine(item.publication_date, time())
+        
+    def item_categories(self, item):
+        return item.document_type
+        
 # --------------------------------------------------------------------------------------------------------------
-# the list view shows a list of records in the database
+# the multiple view shows a list of records in the database
 # --------------------------------------------------------------------------------------------------------------
 def multiple(request, **kwargs):
     
@@ -44,7 +70,7 @@ def multiple(request, **kwargs):
         total_doc_count = FedRegDoc.objects.count()        
 
     # set nav parameters
-    if display_offset < display_num:
+    if display_offset == 0:
         newest_pk=None
         newer_pk=None
     else:
