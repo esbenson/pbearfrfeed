@@ -2,9 +2,12 @@ from django.shortcuts import render_to_response, get_object_or_404, get_list_or_
 from django.core import serializers
 from django.http import Http404
 from django.template import RequestContext
+from urllib2 import urlopen, quote
+import re
+import json
 
 from fedregfeed.models import FedRegDoc, Agency
-from utils import update_database_from_fedreg, generate_chart_url_from_fedreg, generate_chart_url_from_local
+from utils import update_database_from_fedreg, generate_chart_url_from_fedreg, generate_chart_url_from_local, generate_bar_chart_by_agency_from_local
 
 
 # --------------------------------------------------------------------------------------------------------------
@@ -152,6 +155,97 @@ def pbear_chart(request, **kwargs):
 #    chart_url = generate_chart_url_from_fedreg(search_term, start_year, end_year) # generate from fedreg API
     month_flag = False
     chart_url = generate_chart_url_from_local(search_term, start_year, end_year, month_flag)  # generate from local database
+
+    # bar_chart_url = generate_bar_chart_by_agency_from_local()
+    bar_chart_url = None
      
-    return render_to_response('chart.html', {"chart_url": chart_url, "search_term":search_term, "end_year":end_year, "start_year":start_year}, context_instance=RequestContext(request))
+    return render_to_response('chart.html', {"chart_url": chart_url, "bar_chart_url":bar_chart_url, "search_term":search_term, "end_year":end_year, "start_year":start_year}, context_instance=RequestContext(request))
+
+
+# ------------------------------------------------
+#    add html_full_text to database
+#     (only if missing from record) 
+# ------------------------------------------------
+def add_html_full_text_to_all(request):
+    print "in add_html_full_text"
+    for d in FedRegDoc.objects.all():
+        print d.title
+        if not d.html_full_text:
+            f=urlopen(d.html_url)
+            d.html_full_text=f.read()
+            f.close()
+            d.save()
+        
+    return render_to_response('add_html_full_text.html', {}, context_instance=RequestContext(request))
+
+
+# --------------------------------------------
+#    trophy viewer
+#---------------------------------------------
+def show_trophy(request, **kwargs):
     
+    trophies = []
+    
+    # find all records that contain permit apps for trophy import
+    qset = FedRegDoc.objects.filter(html_full_text__contains="applicant requests a permit to import a polar bear")
+    qset = qset.filter(html_full_text__contains="sport")
+    print "count", qset.count()
+    
+    
+    
+    trophy_search_re = re.compile(r"Applicant:\s+(?P<app_name_prefix>(Dr. ))?(?P<app_name>[\w\s.-]+), ((?P<app_name_suffix>(III|(Jr(\.)?)|(Sr(\.)?)|(Inc(\.)?))), )?(?P<app_city>[\w\s.-]+), (?P<app_state>[\w\s.]+), (?P<app_num>[-,\w\s]+)\.?\s?\n(\s+)?The applicant requests a permit to import a polar bear(\s+)?\((\s+)?Ursus maritimus(\s+)?\)(\s+)?", re.DOTALL) # need to extract  add_popn 
+    
+#    (?<=from the )(?P<app_popn>[\w\s]+\b)(?= polar bear population)([,\w\s\]+)?\.", re.DOTALL)
+#(?<=from the )(?P<app_popn>[\w\s]+\b)(?= polar bear population)((,\w\s\)+)?."
+    #([\s]=)?The applicant  \(Ursus maritimus\) (?<=from the )(?P<app_popn>[\w\s]+\b)(?= polar bear population)", re.DOTALL)
+    
+    # (\.)?([\s\n]+)([\(\)<>\w\s\"-=]+)?[\(\)<>\w\s\"-=]+(?<=from the )(?P<app_popn>[\w\s]+\b)(?= polar bear population)" # [\w\s]+<[\w\s\"-=]+>", re.DOTALL) 
+
+#, (?P<app_state>\w+), (?P<app_num>\w+)\.
+# .sport.from the (?P<app_popn>\w+) polar bear population"",     
+    # get applicant name, city, applicant date
+    for d in qset:
+        print "in qset loop"
+        full_text_tags_stripped = re.sub(r"<[\w\s\"-=\.]+>", " ", d.html_full_text)
+        for t in trophy_search_re.finditer(full_text_tags_stripped):
+            print "in trophy loop"
+            app_date = d.publication_date    
+            app_name = t.group('app_name')
+            app_name_suffix = t.group('app_name_suffix')
+            app_name_prefix = t.group('app_name_prefix')
+            app_city = t.group('app_city')
+            app_state = t.group('app_state')
+            app_num = t.group('app_num')
+   #         app_popn=t.group('app_popn')
+      
+
+            trophy_dict = {"app_date":app_date, "app_name":app_name, "app_name_suffix":app_name_suffix, "app_name_prefix":app_name_prefix, "app_city":app_city, "app_state":app_state, "app_num":app_num} #, "app_popn":app_popn}
+    
+            # should add something here to geocode - lat/long from city/state
+            base_geocode_url = "http://maps.googleapis.com/maps/api/geocode/json"
+            params =  "address=" + app_city + ",+" + "app_state" + "&" + "sensor=false"
+            f = urlopen(base_geocode_url + "?" + quote(params, "&=,"))
+            json_geocode_result = f.read()
+            f.close()
+            geocode_result = json.loads(json_geocode_result)
+            print geocode_result
+            if geocode_result['status'] =='OK':            
+                print "hello"
+#                trophy_dict["lat"] = geocode_result['results']['geometry']['location']['lat']
+            else:
+ #               trophy_dict["lng"] = geocode_result['results']['geometry']['location']['lng']
+                trophy_dict["lat"] = trophy_dict["lng"] = None
+                
+            print "trophy_dict: ........ ", trophy_dict
+            trophies.append(trophy_dict) 
+
+                      
+    print "trophies:", trophies
+    print "len(trophies)", len(trophies)
+
+    # should add something here to construct map
+    
+    return render_to_response('trophy.html', {"trophies":trophies}, context_instance=RequestContext(request))
+
+
+

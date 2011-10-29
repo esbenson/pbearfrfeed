@@ -7,10 +7,23 @@
 {% endblock listnav %}
 
 {% block content %}
+    {% if chart_url %}
     <div style="margin-left:auto; margin-right:auto; width:600px;text-align:center;">
-        <h2># of Polar Bear Items in FR / Year</h2>
+        <h2>Number of Polar Bear Items by Year and Type</h2>
         <img src="{{ chart_url }}"/>
     </div>
+    {% endif %}
+
+
+    {% if bar_chart_url %}
+    <br/>
+    <br/>
+        <div style="margin-left:auto; margin-right:auto; width:600px;text-align:center;">
+            <h2>Number of Polar Bear Items by Agency</h2>
+            <img src="{{ bar_chart_url }}"/>
+        </div>
+    {% endif %}
+
 {% endblock content %}
 
     

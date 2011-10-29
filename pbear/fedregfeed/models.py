@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.comments.moderation import CommentModerator, moderator
+
     
 class Agency(models.Model):
     url=models.CharField(max_length=200, null=True, blank=True)
@@ -10,6 +11,7 @@ class Agency(models.Model):
 
     def __unicode__(self):
         return self.raw_name
+
 
 class FedRegDoc(models.Model):
     document_type=models.CharField(max_length=50, null=True, blank=True)
@@ -22,9 +24,11 @@ class FedRegDoc(models.Model):
     json_url=models.CharField(max_length=200, null=True, blank=True)
     html_url=models.CharField(max_length=200, null=True, blank=True)
     pdf_url=models.CharField(max_length=200, null=True, blank=True)
+    html_full_text = models.TextField(null=True, blank=True)
         
     def __unicode__(self):
         return self.title
+    
     
 class FedRegDocModerator(CommentModerator):
     email_notification = False

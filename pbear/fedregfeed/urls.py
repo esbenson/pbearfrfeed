@@ -10,6 +10,8 @@ urlpatterns = patterns('fedregfeed.views',
     url(r'^single/(?P<doc_pk>\d+)/$', 'single', name='pbear_single_pk'), # calls the detail view for single record 
     url(r'^chart/$', 'pbear_chart', {'search_term':'\"polar bear\"|\"polar bears\"', 'end_year':2011, 'start_year':1994}, name='pbear_chart'),
     url(r'^$', 'multiple', {'display_num':display_num}, name='pbear_list_default'), # calls the update/display view with default arguments - (no pk) and num to display
+    url(r'^add_html_full_text/$', 'add_html_full_text_to_all'),
+    url(r'^trophy/$', 'show_trophy'),
 )
 
 urlpatterns += patterns('fedregfeed',
