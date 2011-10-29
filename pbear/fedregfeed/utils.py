@@ -13,6 +13,30 @@ import random
 # --------------------------------------------------------------
 # generate chart url - getting counts from FR api
 # -------------------------------------------------------------------------
+def generate_trophy_map_chart_url(state_counts):
+
+    base_url = 'https://chart.googleapis.com/chart'
+    map_type = "cht=map"
+    map_size = "chs=" + "600x400" 
+    map_states="chld=" 
+    color_values = "chd=t:"
+    for k,v in state_counts.iteritems():
+        map_states += "US-" + k + "|"
+        color_values += str(v) + ","
+    map_states=map_states[:-1] #remove trailing pipe
+    color_values=color_values[:-1]# remove trailing comma
+    color_gradient="chco=CCCCCC,FFFFFF,0000FF" # from white to blue, on gray background   
+
+    params = map_type + "&" + map_size + "&" + map_states + "&" + color_values + "&" + color_gradient 
+    chart_url = base_url + "?" + quote(params, "&?,=|")   
+    print "chart_url in generate_trophy_map_chart_url", chart_url 
+
+    return chart_url
+    
+
+# --------------------------------------------------------------
+# generate chart url - getting counts from FR api
+# -------------------------------------------------------------------------
 def generate_chart_url_from_fedreg(search_term, start_year, end_year):
     ''' returns url for chart after querying FR API '''
     
@@ -305,4 +329,147 @@ def update_database_from_fedreg(base_url, conditions):
             break
 
     return search_result_page
+
+# -------------------------------------------------------------------------------------
+#   if recognized state abbrev, expands to full,
+#   otherwise returns it as it is except stripped of trailing and leading whitespace
+# -------------------------------------------------------------------------------------
+def retrieve_full_state_name(state):
+    
+    state_dict = {
+        "AL": 'Alabama', 
+        "AK": 'Alaska', 
+        "AZ": 'Arizona', 
+        "AR": 'Arkansas', 
+        "CA": 'California',
+        "CO": 'Colorado',
+        "CT": 'Connecticut', 
+        "DC": 'District of Columbia',
+        "DE": 'Delaware', 
+        "FL": 'Florida', 
+        "GA": 'Georgia',
+        "HI": 'Hawaii', 
+        "ID": 'Idaho', 
+        "IL": 'Illinois', 
+        "IN": 'Indiana', 
+        "IA": 'Iowa', 
+        "KS": 'Kansas', 
+        "KY": 'Kentucky', 
+        "LA": 'Louisiana', 
+        "ME": 'Maine', 
+        "MD": 'Maryland',
+        "MA": 'Massachusetts', 
+        "MI": 'Michigan', 
+        "MN": 'Minnesota', 
+        "MS": 'Mississippi', 
+        "MO": 'Missouri', 
+        "MT": 'Montana', 
+        "NE": 'New England',
+        "NV": 'Nevada', 
+        "NH": 'New Hampshire', 
+        "NJ": 'New Jersey',
+        "NM": 'New Mexico', 
+        "NY": 'New York', 
+        "NC": 'North Carolina', 
+        "ND": 'North Dakota', 
+        "OH": 'Ohio', 
+        "OK": 'Oklahoma', 
+        "OR": 'Oregon',
+        "PA": 'Pennsylvania', 
+        "RI": 'Rhode Island', 
+        "SC": 'South Carolina',
+        "SD": 'South Dakota', 
+        "TN": 'Tennessee', 
+        "TX": 'Texas', 
+        "UT": 'Utah', 
+        "VT": 'Vermont', 
+        "VA": 'Virginia', 
+        "WA": 'Washington', 
+        "WV": 'West Virginia', 
+        "WI": 'Wisconsin', 
+        "WY": 'Wyoming'
+    }
+    
+    state = state.strip()
+    state = state_dict.get(state, state)
+     
+    return state
+
+
+# -------------------------------------------------------------------------------------
+#   if recognized state abbrev, expands to full,
+#   otherwise returns it as it is except stripped of trailing and leading whitespace
+# -------------------------------------------------------------------------------------
+def retrieve_abbrev_state_name(state):
+    
+    state_dict = {
+        "AL":'Alabama', 
+        "AK":'Alaska', 
+         "AZ": 'Arizona', 
+        "AR": 'Arkansas', 
+        "CA": 'California',
+        "CO": 'Colorado',
+        "CT": 'Connecticut', 
+        "DC": 'District of Columbia',
+        "DE": 'Delaware', 
+        "FL": 'Florida', 
+        "GA": 'Georgia',
+        "HI": 'Hawaii', 
+        "ID": 'Idaho', 
+        "IL": 'Illinois', 
+        "IN": 'Indiana', 
+        "IA": 'Iowa', 
+        "KS": 'Kansas', 
+        "KY": 'Kentucky', 
+        "LA": 'Louisiana', 
+        "ME": 'Maine', 
+        "MD": 'Maryland',
+        "MA": 'Massachusetts', 
+        "MI": 'Michigan', 
+        "MN": 'Minnesota', 
+        "MS": 'Mississippi', 
+        "MO": 'Missouri', 
+        "MT": 'Montana', 
+        "NE": 'New England',
+        "NV": 'Nevada', 
+        "NH": 'New Hampshire', 
+        "NJ": 'New Jersey',
+        "NM": 'New Mexico', 
+        "NY": 'New York', 
+        "NC": 'North Carolina', 
+        "ND": 'North Dakota', 
+        "OH": 'Ohio', 
+        "OK": 'Oklahoma', 
+        "OR": 'Oregon',
+        "PA": 'Pennsylvania', 
+        "RI": 'Rhode Island', 
+        "SC": 'South Carolina',
+        "SD": 'South Dakota', 
+        "TN": 'Tennessee', 
+        "TX": 'Texas', 
+        "UT": 'Utah', 
+        "VT": 'Vermont', 
+        "VA": 'Virginia', 
+        "WA": 'Washington', 
+        "WV": 'West Virginia', 
+        "WI": 'Wisconsin', 
+        "WY": 'Wyoming'
+    }
+    
+    new_state = None
+    state = state.strip()
+    for abbrev,full in state_dict.iteritems():
+        if state == full:
+            new_state = abbrev
+            break
+        elif state == abbrev:
+            new_state = abbrev
+            break
+
+    print state, new_state
+ 
+    if new_state:
+        return new_state
+    else:
+        return None
 

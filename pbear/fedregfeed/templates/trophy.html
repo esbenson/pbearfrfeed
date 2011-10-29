@@ -3,12 +3,19 @@
 {% block title %}Polar Bear Feed: Trophies{% endblock title %}
 
 {% block content %}
-    <h2>Trophies</h2>
-    {% for t in trophies %}
-        <P>
-        {% for k, v in t.items %}
-            {{k}}:{{v}}</br/>
-        {% endfor %}
-        </P>
+    <div style="margin-left:auto; margin-right:auto; width:600px;text-align:center;">
+    <h2>Permit Applications for Polar Bear Trophies by State</h2>
+
+    {% if map_url %}
+        <img src="{{ map_url }}"/>
+    {% endif %}
+
+    <table>
+    <tr><th>State</th><th>Number of Permit Apps</th></tr>
+    {% for k,v in state_counts.items %}
+        <tr><td>{{k}}</td><td>{{v}}</td></tr>
     {% endfor %}
+    </table>
+</div>    
 {% endblock content %}
+

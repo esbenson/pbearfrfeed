@@ -12,6 +12,7 @@ urlpatterns = patterns('fedregfeed.views',
     url(r'^$', 'multiple', {'display_num':display_num}, name='pbear_list_default'), # calls the update/display view with default arguments - (no pk) and num to display
     url(r'^add_html_full_text/$', 'add_html_full_text_to_all'),
     url(r'^trophy/$', 'show_trophy'),
+    url(r'^test_trophy/$', 'test_trophy_view'),
 )
 
 urlpatterns += patterns('fedregfeed',

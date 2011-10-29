@@ -7,8 +7,7 @@ import re
 import json
 
 from fedregfeed.models import FedRegDoc, Agency
-from utils import update_database_from_fedreg, generate_chart_url_from_fedreg, generate_chart_url_from_local, generate_bar_chart_by_agency_from_local
-
+from utils import update_database_from_fedreg, generate_chart_url_from_fedreg, generate_chart_url_from_local, generate_bar_chart_by_agency_from_local, generate_trophy_map_chart_url, retrieve_full_state_name, retrieve_abbrev_state_name
 
 # --------------------------------------------------------------------------------------------------------------
 # the multiple view shows a list of records in the database
@@ -69,7 +68,7 @@ def multiple(request, **kwargs):
 
 
 # --------------------------------------------------------------------------------------------------------------
-# the single view shows details for a single fedreg document based on pk number (which is already in the database)
+# the single view shows details for a single fedreg document based on primary key (pk) number
 #
 # --------------------------------------------------------------------------------------------------------------
 def single(request, **kwargs):
@@ -185,67 +184,104 @@ def add_html_full_text_to_all(request):
 def show_trophy(request, **kwargs):
     
     trophies = []
+    google_geocode_OVER_QUERY_LIMIT = False
     
     # find all records that contain permit apps for trophy import
     qset = FedRegDoc.objects.filter(html_full_text__contains="applicant requests a permit to import a polar bear")
     qset = qset.filter(html_full_text__contains="sport")
     print "count", qset.count()
-    
-    
-    
-    trophy_search_re = re.compile(r"Applicant:\s+(?P<app_name_prefix>(Dr. ))?(?P<app_name>[\w\s.-]+), ((?P<app_name_suffix>(III|(Jr(\.)?)|(Sr(\.)?)|(Inc(\.)?))), )?(?P<app_city>[\w\s.-]+), (?P<app_state>[\w\s.]+), (?P<app_num>[-,\w\s]+)\.?\s?\n(\s+)?The applicant requests a permit to import a polar bear(\s+)?\((\s+)?Ursus maritimus(\s+)?\)(\s+)?", re.DOTALL) # need to extract  add_popn 
-    
-#    (?<=from the )(?P<app_popn>[\w\s]+\b)(?= polar bear population)([,\w\s\]+)?\.", re.DOTALL)
-#(?<=from the )(?P<app_popn>[\w\s]+\b)(?= polar bear population)((,\w\s\)+)?."
-    #([\s]=)?The applicant  \(Ursus maritimus\) (?<=from the )(?P<app_popn>[\w\s]+\b)(?= polar bear population)", re.DOTALL)
-    
-    # (\.)?([\s\n]+)([\(\)<>\w\s\"-=]+)?[\(\)<>\w\s\"-=]+(?<=from the )(?P<app_popn>[\w\s]+\b)(?= polar bear population)" # [\w\s]+<[\w\s\"-=]+>", re.DOTALL) 
+        
+    # set up regex to extract trophy data from full html text
+    trophy_search_re = re.compile(r"Applicant:\s+(?P<app_name_prefix>(Dr. ))?(?P<app_name>[\w\s.-]+)(,)? ((?P<app_name_suffix>(III|(Jr(\.)?)|(Sr(\.)?)|(Inc(\.)?))), )?(?P<app_city>[\w\s.-]+), (?P<app_state>[\w\s]+)(, (?P<app_num>[-,\w\s]+))?\.?\s?\n(\s+)?The applicant requests a permit to import a polar bear(\s+)?\((\s+)?Ursus maritimus(\s+)?\)(\s+)?sport( |-)?hunted from the (?P<app_popn>[\w\s]+) polar bear population", re.DOTALL) # need to extract  add_popn 
 
-#, (?P<app_state>\w+), (?P<app_num>\w+)\.
-# .sport.from the (?P<app_popn>\w+) polar bear population"",     
-    # get applicant name, city, applicant date
+    # get applicant name, city, applicant date, etc. from each matching Fedregdoc
+    # THIS IS STILL NOT WORKING CORRECTLY
     for d in qset:
-        print "in qset loop"
         full_text_tags_stripped = re.sub(r"<[\w\s\"-=\.]+>", " ", d.html_full_text)
         for t in trophy_search_re.finditer(full_text_tags_stripped):
-            print "in trophy loop"
             app_date = d.publication_date    
             app_name = t.group('app_name')
             app_name_suffix = t.group('app_name_suffix')
             app_name_prefix = t.group('app_name_prefix')
             app_city = t.group('app_city')
-            app_state = t.group('app_state')
+            app_state = retrieve_abbrev_state_name(t.group('app_state')) # converts to two-letter abbrevs or "None" if not recognized as valid US state name
             app_num = t.group('app_num')
-   #         app_popn=t.group('app_popn')
-      
+            app_popn=t.group('app_popn')      
+            trophy_dict = {"app_date":app_date, "app_name":app_name, "app_name_suffix":app_name_suffix, "app_name_prefix":app_name_prefix, "app_city":app_city, "app_state":app_state, "app_num":app_num, "app_popn":app_popn, 'lat':None, 'lng':None}
 
-            trophy_dict = {"app_date":app_date, "app_name":app_name, "app_name_suffix":app_name_suffix, "app_name_prefix":app_name_prefix, "app_city":app_city, "app_state":app_state, "app_num":app_num} #, "app_popn":app_popn}
-    
-            # should add something here to geocode - lat/long from city/state
-            base_geocode_url = "http://maps.googleapis.com/maps/api/geocode/json"
-            params =  "address=" + app_city + ",+" + "app_state" + "&" + "sensor=false"
-            f = urlopen(base_geocode_url + "?" + quote(params, "&=,"))
-            json_geocode_result = f.read()
-            f.close()
-            geocode_result = json.loads(json_geocode_result)
-            print geocode_result
-            if geocode_result['status'] =='OK':            
-                print "hello"
-#                trophy_dict["lat"] = geocode_result['results']['geometry']['location']['lat']
-            else:
- #               trophy_dict["lng"] = geocode_result['results']['geometry']['location']['lng']
-                trophy_dict["lat"] = trophy_dict["lng"] = None
+            # ------ the following works (as long as not over google api limit) --- geocode - lat/long from city/state
+            if not google_geocode_OVER_QUERY_LIMIT:
+                if app_state:
+                    base_geocode_url = "http://maps.googleapis.com/maps/api/geocode/json"
+                    params =  "address=" + app_city + ",+" + app_state + "&" + "sensor=false"
+                    geocode_url = base_geocode_url + "?" + quote(params, "+&,=")
+                    f = urlopen(geocode_url)
+                    geocode_result_json = f.read()
+                    f.close()
+                    geocode_result = json.loads(geocode_result_json)
+                    print "geocode_url:", geocode_url
+                    print "geocode_result:", geocode_result
+                    if geocode_result['status'] =='OK':            
+                        trophy_dict['lat'] = geocode_result['results'][0]['geometry']['location']['lat']
+                        trophy_dict["lng"] = geocode_result['results'][0]['geometry']['location']['lng']
+                    else:
+                        trophy_dict['lat'] = trophy_dict['lng'] = 0
+                        if geocode_result['status'] == 'OVER_QUERY_LIMIT': # stop hammering the google geocoder if over limit
+                            google_geocode_OVER_QUERY_LIMIT = True
+             # --- end geocoding
                 
-            print "trophy_dict: ........ ", trophy_dict
-            trophies.append(trophy_dict) 
+            trophies.append(trophy_dict)
 
-                      
-    print "trophies:", trophies
-    print "len(trophies)", len(trophies)
+    # calculate number of permit apps by state
+    state_counts = {}
+    for t in trophies:
+        for k,v in t.iteritems():
+            if k == 'app_state':
+                if v != None:
+                    if state_counts.get(v):
+                        state_counts[v] += 1
+                    else:
+                        state_counts[v] = 1
 
-    # should add something here to construct map
+    # should insert something here to create sorted lists of (full) state names and counts for better display
     
-    return render_to_response('trophy.html', {"trophies":trophies}, context_instance=RequestContext(request))
+        
+    
+    #-----the following works in theory, 
+    # ---- but in practice generates a map that is too big for Google Static Map API (too many markers)
+    #base_map_url = 'http://maps.googleapis.com/maps/api/staticmap'
+    #map_size = "size=500x400"
+    #sensor = "sensor=false"
+    #marker_style = 'size:tiny|color:blue'
+    #marker_locations = ''
+    #for t in trophies:
+    #    marker_locations += str(t['lat']) + "," + str(t['lng']) + "|"        
+    #markers = 'markers=' + marker_style + "|" + marker_locations[:-1] # strips last pipe char
+    #map_params = map_size + "&" + markers + "&" + sensor
+    #map_url = base_map_url + "?" + quote(map_params, '&')
 
+    # generate URL to map using Google Map Chart 
+    map_url = None
+    map_url = generate_trophy_map_chart_url(state_counts)
+    print "map_url", map_url
+        
+    return render_to_response('trophy.html', {"trophies":trophies, 'map_url':map_url, "state_counts":state_counts}, context_instance=RequestContext(request))
+
+
+#-----------------------------------------
+# --- test trophy view w/ minimal dataset
+#-----------------------------------------
+def test_trophy_view(request):
+    trophies= []
+    trophies.append( {'lat':45, 'lng':65, 'app_name':'Name', 'app_popn':'Popn', 'app_name_suffice':'Sffx', 'app_name_prefix':'prfx', 'app_city':'City', 'app_num':'Num', 'app_date':'Date'} )
+    map_url = "map url"
+
+    print trophies
+    print trophies[0]
+    print "trophies[0]['lat']", trophies[0]['lat']
+    for t in trophies:
+        print t['lat'], t['lng']
+    
+    return render_to_response('trophy.html', {"trophies":trophies, 'map_url':map_url}, context_instance=RequestContext(request))
 
 
