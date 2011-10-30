@@ -192,12 +192,8 @@ def show_trophy(request, **kwargs):
     qset = qset.filter(html_full_text__contains="sport")
     print "count", qset.count()
         
-    # set up regex to extract trophy data from full html text
-    # THIS IS STILL NOT WORKING CORRECTLY (false negs) ------- does not currently work for pre-xml (i.e., pre-2001) data
+    # set up regex to extract trophy data from full html text (still problems with some false negs)
     trophy_search_re = re.compile(r"Applicant:[ ]+(?P<app_name_prefix>Dr\.)?([ ]+)?(?P<app_name>[\w\s.-]+),?(\s+)?(?P<app_name_suffix>III|IV|MD|Jr(\.)?|Sr(\.)?|Inc(\.)?)?,?[ ]+(?P<app_city>[ \w\.-]+),[ ]+(?P<app_state>\w\w)(,?[ ]+(?P<app_num>[-,\w\s]+))?(\.)?(\s+)?The applicant requests a permit to import a polar bear(.+?)from the[ ]+(?P<app_popn>[ \w]+)[ ]+polar bear population",re.DOTALL)
-       
-    #print "count of lte-2000 in qset", qset.filter(publication_date__lte=datetime.date(2000, 1, 1)).count()
-    #print "count of gte-2000 in qset", qset.filter(publication_date__gte=datetime.date(2000, 1, 1)).count()
          
     # get applicant name, city, applicant date, etc. from each matching Fedregdoc
     for d in qset:
@@ -265,8 +261,7 @@ def show_trophy(request, **kwargs):
                         state_counts[v] = 1
     print state_counts
 
-
-    # should insert something here to create sorted lists of (full) state names and counts for better display
+    # create sorted lists of (full) state names and counts for better display
     state_counts_sorted = []
     for k,v in state_counts.iteritems():
         print retrieve_full_state_name(k),v
@@ -274,13 +269,13 @@ def show_trophy(request, **kwargs):
     state_counts_sorted.sort(key=itemgetter(0))    
     print "state_counts_sorted\n" , state_counts_sorted
  
-    # sorts trophy details for display
+    # sort trophy details by date for display
     trophies_sorted=[]
     for t in trophies:
         trophies_sorted.append([t['app_date'], t['app_name_prefix'], t['app_name'],t['app_name_suffix'],t['app_city'],t['app_state'],t['app_num'], t['app_popn']]) # if using lat/lng would need to add in here
     trophies_sorted.sort(key=itemgetter(0))         
     
-    #-----the following would work except it generates a map that is too big for Google Static Map API (too many markers)
+    #-----the following would work except that it generates a map that is too big for Google Static Map API (too many markers)
     #base_map_url = 'http://maps.googleapis.com/maps/api/staticmap'
     #map_size = "size=500x400"
     #sensor = "sensor=false"
