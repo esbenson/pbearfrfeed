@@ -387,7 +387,8 @@ def retrieve_full_state_name(state):
         "WA": 'Washington', 
         "WV": 'West Virginia', 
         "WI": 'Wisconsin', 
-        "WY": 'Wyoming'
+        "WY": 'Wyoming',
+        "PR": "Puerto Rico"
     }
     
     state = state.strip()
@@ -453,7 +454,8 @@ def retrieve_abbrev_state_name(state):
         "WA": 'Washington', 
         "WV": 'West Virginia', 
         "WI": 'Wisconsin', 
-        "WY": 'Wyoming'
+        "WY": 'Wyoming',
+        "PR": "Puerto Rico"
     }
     
     new_state = None

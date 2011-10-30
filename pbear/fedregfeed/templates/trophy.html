@@ -4,18 +4,41 @@
 
 {% block content %}
     <div style="margin-left:auto; margin-right:auto; width:600px;text-align:center;">
-    <h2>Permit Applications for Polar Bear Trophies by State</h2>
+    <h2>Applications for Polar Bear Trophy Import Permits by State, 1997-2008</h2>
 
+<!-- show map -->
     {% if map_url %}
         <img src="{{ map_url }}"/>
     {% endif %}
 
-    <table>
-    <tr><th>State</th><th>Number of Permit Apps</th></tr>
-    {% for k,v in state_counts.items %}
-        <tr><td>{{k}}</td><td>{{v}}</td></tr>
+<!-- show state/count details -->
+<div style="text-align:left"><span style="font-weight:bold">Number of Permit Applications per State</span>: {% for s in state_counts_sorted %}
+        <span style="font-style:italic">{{s.0}}</span>: {{s.1}}{% if not forloop.last %},
+        {% endif %}
     {% endfor %}
-    </table>
+</div>
 </div>    
+
+
+<!-- show trophy details -->
+<div style="margin-left:auto; margin-right:auto; width:900px;text-align:center;font-size:10pt; align:center">
+<h2>Details</h2>
+    <table style="margin-left:auto; margin-right:auto; width:900px; font-size:8pt; text-align:left">
+    <tr><th></th><th width="100px">Date</th><th> </th><th>Name</th><th> </th><th>City</th><th>State</th><th>Permit #</th><th>Source Population</th></tr>
+      {% for t in trophies_sorted %}
+    <tr><td style="font-weight:bold">{{ forloop.counter }}</td>
+        {% for v in t %}
+        <td>{% if v %}{{ v}} {% endif %}</td>
+    {% endfor %}</tr>
+    {% endfor %}
+</table>
+
+
+<br/>
+<p style="text-align:center"><span style="font-weight:bold">Note</span>: This list was automatically generated and may include errors and omissions.</p>
+
+</div>
+
+
 {% endblock content %}
 
