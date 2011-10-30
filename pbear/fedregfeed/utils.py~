@@ -364,7 +364,7 @@ def retrieve_full_state_name(state):
         "MS": 'Mississippi', 
         "MO": 'Missouri', 
         "MT": 'Montana', 
-        "NE": 'New England',
+        "NE": 'Nebraska',
         "NV": 'Nevada', 
         "NH": 'New Hampshire', 
         "NJ": 'New Jersey',
@@ -387,7 +387,8 @@ def retrieve_full_state_name(state):
         "WA": 'Washington', 
         "WV": 'West Virginia', 
         "WI": 'Wisconsin', 
-        "WY": 'Wyoming'
+        "WY": 'Wyoming',
+        "PR": "Puerto Rico"
     }
     
     state = state.strip()
@@ -430,7 +431,7 @@ def retrieve_abbrev_state_name(state):
         "MS": 'Mississippi', 
         "MO": 'Missouri', 
         "MT": 'Montana', 
-        "NE": 'New England',
+        "NE": 'Nebraska',
         "NV": 'Nevada', 
         "NH": 'New Hampshire', 
         "NJ": 'New Jersey',
@@ -453,7 +454,8 @@ def retrieve_abbrev_state_name(state):
         "WA": 'Washington', 
         "WV": 'West Virginia', 
         "WI": 'Wisconsin', 
-        "WY": 'Wyoming'
+        "WY": 'Wyoming',
+        "PR": "Puerto Rico"
     }
     
     new_state = None
