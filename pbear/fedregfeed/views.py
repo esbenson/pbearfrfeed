@@ -259,20 +259,20 @@ def show_trophy(request, **kwargs):
                         state_counts[v] += 1
                     else:
                         state_counts[v] = 1
-    print state_counts
 
     # create sorted lists of (full) state names and counts for better display
     state_counts_sorted = []
+    state_counts_total = 0
     for k,v in state_counts.iteritems():
         print retrieve_full_state_name(k),v
         state_counts_sorted.append([retrieve_full_state_name(k), v])
+        state_counts_total += int(v)
     state_counts_sorted.sort(key=itemgetter(0))    
-    print "state_counts_sorted\n" , state_counts_sorted
- 
+    print "state_counts_total", state_counts_total
     # sort trophy details by date for display
     trophies_sorted=[]
     for t in trophies:
-        trophies_sorted.append([t['app_date'], t['app_name_prefix'], t['app_name'],t['app_name_suffix'],t['app_city'],t['app_state'],t['app_num'], t['app_popn']]) # if using lat/lng would need to add in here
+        trophies_sorted.append([t['app_date'], t['app_name_prefix'], t['app_name'], t['app_name_suffix'], t['app_city'], t['app_state'], t['app_num'], t['app_popn']]) # if using lat/lng would need to add in here
     trophies_sorted.sort(key=itemgetter(0))         
     
     #-----the following would work except that it generates a map that is too big for Google Static Map API (too many markers)
@@ -290,6 +290,6 @@ def show_trophy(request, **kwargs):
     # generate URL to map using Google Map Chart 
     map_url = generate_trophy_map_chart_url(state_counts)
         
-    return render_to_response('trophy.html', {"trophies_sorted":trophies_sorted, 'map_url':map_url, "state_counts_sorted":state_counts_sorted}, context_instance=RequestContext(request))
+    return render_to_response('trophy.html', {"trophies_sorted":trophies_sorted, 'map_url':map_url, "state_counts_sorted":state_counts_sorted, "state_counts_total":state_counts_total}, context_instance=RequestContext(request))
 
 

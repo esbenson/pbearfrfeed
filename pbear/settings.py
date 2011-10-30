@@ -2,7 +2,7 @@ import os.path
 
 # Django settings for pbear project.
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (

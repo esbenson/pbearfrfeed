@@ -19,7 +19,7 @@
 <div style="text-align:left"><span style="font-weight:bold">Number of Permit Applications per State</span>: {% for s in state_counts_sorted %}
         <span style="font-style:italic">{{s.0}}</span>: {{s.1}}{% if not forloop.last %},
         {% endif %}
-    {% endfor %}
+    {% endfor %}. <span style="font-style:italic">TOTAL</span>: {{ state_counts_total }}. <span style="font-weight:bold">Note</span>: These figures were calculated from the list given below, which was automatically generated and may include errors and omissions.
 </div>
 </div>    
 
