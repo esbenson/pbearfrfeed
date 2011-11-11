@@ -14,7 +14,7 @@
 {% endblock newnav %}
 
 {% block listnav %}
-            <p>records {{display_offset|add:1}}-{{display_offset|add:display_num}} of {{total_doc_count}}</P>
+            <p>Records {{display_offset|add:1}}-{{display_offset|add:display_num}} of {{total_doc_count}}</P>
 {% endblock listnav %}
 
 {% block oldnav %}
@@ -35,12 +35,15 @@
         {% if doc_list %}            
             {% load comments %}
 
-
+        <table>
             {% for doc in doc_list %}    
                    
-             <p class = "doc_data">
+             <tr>     
+             <td width="100"><span class="doc_date" >{{doc.publication_date}}</span></td>
+            <td>
                  <span class="doc_title" style="font-weight:bold;" ><a href="{% url pbear_single_pk doc_pk=doc.pk %}">{{doc.title}}</a></span> <br/>  
-                 <span class="doc_date">{{doc.publication_date}}</span> &bull;
+                 
+                 <!--
                  <span class="doc_type">{{doc.document_type}}</span> &bull;  
                  <span class="doc_agency">
                  {% for a in doc.agencies.all %}
@@ -68,9 +71,13 @@
             {% get_comment_count for doc as comment_count %}
                  &bull; <span class="doc_comments_heading">Comments: {{comment_count}}</span>
                </p>
+            -->
             
+            </td></tr>
             {% endfor %}
             
+            
+              </table>
         {% else %}
             <p>nothing found</p>
         {% endif %}

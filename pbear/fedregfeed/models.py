@@ -10,8 +10,10 @@ class Agency(models.Model):
     raw_name=models.CharField(max_length=200, null=True, blank=True)
 
     def __unicode__(self):
-        return self.raw_name
-
+        if self.name:
+            return self.name
+        else:
+            return self.raw_name
 
 class FedRegDoc(models.Model):
     document_type=models.CharField(max_length=50, null=True, blank=True)
@@ -24,11 +26,22 @@ class FedRegDoc(models.Model):
     json_url=models.CharField(max_length=200, null=True, blank=True)
     html_url=models.CharField(max_length=200, null=True, blank=True)
     pdf_url=models.CharField(max_length=200, null=True, blank=True)
+    # add field for pdf binary
     html_full_text = models.TextField(null=True, blank=True)
-        
+    # add field for json
+
     def __unicode__(self):
         return self.title
     
+class FedRegDocGloss(models.Model):
+    title=models.CharField(max_length=500)
+    datetime=models.DateTimeField() # set default for now?
+    content=models.TextField(null=True, blank=True)
+
+    doc=models.OneToOneField(FedRegDoc)
+
+    def __unicode__(self):
+        return self.title
     
 class FedRegDocModerator(CommentModerator):
     email_notification = False

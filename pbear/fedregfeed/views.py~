@@ -9,11 +9,16 @@ import json
 import datetime
 from operator import itemgetter
 
-from fedregfeed.models import FedRegDoc, Agency
-from utils import update_database_from_fedreg, generate_chart_url_from_fedreg, generate_chart_url_from_local, generate_bar_chart_by_agency_from_local, generate_trophy_map_chart_url, retrieve_full_state_name, retrieve_abbrev_state_name
+from fedregfeed.models import FedRegDoc, Agency #, FedRegDocDesc
+
+from utils import update_database_from_fedreg, full_state_name_from_abbrev, abbrev_state_name_from_full, regularize_population_name
+from charts import generate_freq_chart_url_from_fedreg, generate_freq_chart_url_from_local, generate_bar_chart_by_agency_from_local, generate_trophy_map_chart_url, generate_pie_chart_source_popn, generate_trophy_freq_chart_url
 
 # --------------------------------------------------------------------------------------------------------------
 # the multiple view shows a list of records in the database
+#
+# this should be changed so that it displays info from descs for each fedregodoc
+# (defaulting to displaying minimal FedRegDoc info if no associated description)
 # --------------------------------------------------------------------------------------------------------------
 def multiple(request, **kwargs):
 
@@ -26,7 +31,7 @@ def multiple(request, **kwargs):
 
     # check for update arg
     try:
-        update_database_flag = kwargs['update_database']
+        update_database_flag = kwargs['update_database_flag']
         print "update_database_flag value:", update_database_flag
     except KeyError:
         update_database_flag = False
@@ -80,9 +85,9 @@ def multiple(request, **kwargs):
         display_offset = 0
         total_doc_count = FedRegDoc.objects.count()        
 
+    # set nav parameters
     print "total_doc_count", total_doc_count
     print "setting nav parameters"
-    # set nav parameters
     try:
         if display_offset == 0:
             newest_pk=None
@@ -202,9 +207,9 @@ def pbear_chart(request, **kwargs):
 
     month_flag = False
     # the following generates chart from local database
-    chart_url = generate_chart_url_from_local(search_term, start_year, end_year, month_flag)  
+    chart_url = generate_freq_chart_url_from_local(search_term, start_year, end_year, month_flag)  
     # the following generates chart from FR API
-    # chart_url = generate_chart_url_from_fedreg(search_term, start_year, end_year)
+    # chart_url = generate_freq_chart_url_from_fedreg(search_term, start_year, end_year)
 
     # the following line generates a bar chart showing number of records per agency 
     # bar_chart_url = generate_bar_chart_by_agency_from_local()
@@ -242,11 +247,15 @@ def add_html_full_text_to_all(request):
 #   a helper for show_trophy
 # ---------------------------------------------------
 def strip_polar_bear_html(html_full_text):
+    # these are to roughly strip HTML tags and replace whitespace with a single space
     full_text_stripped = re.sub(r"<.*?>", " ", html_full_text)
     full_text_stripped = re.sub(r"\s+", " ", full_text_stripped)
+
+    # these are to address specific problems with source text 
     full_text_stripped = re.sub(r"Back to Top", " ", full_text_stripped)
     full_text_stripped = re.sub(r"Lancaster Sound polar bear from the Lancaster Sound", "Lancaster Sound", full_text_stripped)
-
+    full_text_stripped = re.sub(r"Northern Beaufort population polar bear population", "Northern Beaufort polar bear population", full_text_stripped)
+     
     return full_text_stripped        
 
 # --------------------------------------------
@@ -301,27 +310,24 @@ def generate_google_map_with_markers_url(trophies):
 
     return map_url
 
-        
+
 # --------------------------------------------
-#    trophy map and detail view
+#    helper for trophy view
+#   extracts records for database 
+# and if flag set, uses google to geocode towns
 #---------------------------------------------
-def show_trophy(request, **kwargs):
-            
-    google_geocode_flag = False # NEED TO SET TO True TO ALLOW GEOCODING    
+def extract_trophy_records_from_local(google_geocode_flag):
 
     trophies = []
-    trophies_sorted=[]
-    state_counts = {}
-    state_counts_sorted = []
-    state_counts_total = 0
+    trophy_dict = {}
     
-    # find all records that contain permit apps for trophy import
+    # find all records that contain permit apps for trophy import - basically, use a first pass in the database to speed up search
     qset = FedRegDoc.objects.filter(html_full_text__contains="applicant requests a permit to import a polar bear")
     qset = qset.filter(html_full_text__contains="sport")
     #print "count", qset.count()
             
-    # set up regex to extract trophy data from full html text (still problems with some false negs)
-    trophy_search_re = re.compile(r"Applicant:[ ]+(?P<app_name_prefix>Dr\.)?([ ]+)?(?P<app_name>[\w\s.-]+),?(\s+)?(?P<app_name_suffix>III|IV|MD|Jr(\.)?|Sr(\.)?|Inc(\.)?)?,?[ ]+(?P<app_city>[ \w\.-]+),[ ]+(?P<app_state>\w\w)(,?[ ]+(?P<app_num>[-,\w\s]+))?(\.)?(\s+)?The applicant requests a permit to import a polar bear(.+?)from the[ ]+(?P<app_popn>[ \w]+)[ ]+polar bear population",re.DOTALL)
+    # set up regex to extract trophy data from full html text (still problems with some false negs  and missing PRTs (permit numbers))
+    trophy_search_re = re.compile(r"Applicant:[ ]+(?P<app_name_prefix>Dr\.)?([ ]+)?(?P<app_name>[\w\s.-]+),?[ ]*(?P<app_name_suffix>III|IV|MD|Jr(\.)?|Sr(\.)?|Inc(\.)?)?,?[ ]+(?P<app_city>[ \w\.-]+),[ ]+(?P<app_state>\w\w)(,?[ ]+(?P<app_num>[-,\w\s]+))?(\.)?(\s+)?The applicant requests a permit to import a polar bear(.+?)from the[ ]+(?P<app_popn>[ \w]+)[ ]+polar bear population",re.DOTALL)
          
     # get applicant name, city, applicant date, etc. from each matching Fedregdoc
     for d in qset:
@@ -339,7 +345,7 @@ def show_trophy(request, **kwargs):
             app_state = t.group('app_state')
             app_popn=t.group('app_popn')     
             # following line converts written-out name to two-letter abbrevs or "None" if not recognized as valid US state name
-            app_state = retrieve_abbrev_state_name(t.group('app_state')) 
+            app_state = abbrev_state_name_from_full(t.group('app_state')) 
             # following section makes sure permit number isn't just whitespace
             app_num = t.group('app_num')
             if app_num:
@@ -362,6 +368,24 @@ def show_trophy(request, **kwargs):
                 
             trophies.append(trophy_dict)
 
+    return trophies
+        
+        
+        
+# --------------------------------------------
+#    trophy map and detail view
+#---------------------------------------------
+def show_trophy(request, **kwargs):
+            
+    trophies = []
+    trophies_sorted=[]
+    state_counts = {}
+    state_counts_sorted = []
+    state_counts_total = 0
+
+    google_geocode_flag = False # NEED TO SET TO True TO ALLOW GEOCODING    
+    trophies = extract_trophy_records_from_local(google_geocode_flag)
+    
     # sum number of permit apps per state
     for t in trophies:
         for k,v in t.iteritems():
@@ -374,19 +398,22 @@ def show_trophy(request, **kwargs):
 
     # create sorted lists of (full) state names and counts for better display
     for k,v in state_counts.iteritems():
-        state_counts_sorted.append([retrieve_full_state_name(k), v])
+        state_counts_sorted.append([full_state_name_from_abbrev(k), v])
         state_counts_total += int(v)
     state_counts_sorted.sort(key=itemgetter(0))    
 
-    # sort trophy details by date for display and place in list of lists
-    for t in trophies:
-        trophies_sorted.append([t['app_date'], t['app_name_prefix'], t['app_name'], t['app_name_suffix'], t['app_city'], t['app_state'], t['app_num'], t['app_popn']]) # if using lat/lng would need to add in here
+    # sort trophy details by date for display and place in list of lists and regularize source population names
+    for t in trophies:    
+        t['app_popn'] = regularize_population_name(t['app_popn'])                               
+        trophies_sorted.append([t['app_date'], t['app_name_prefix'], t['app_name'], t['app_name_suffix'], t['app_city'], t['app_state'], t['app_num'], t['app_popn']]) # if using lat/lng would need to add in here for display
     trophies_sorted.sort(key=itemgetter(0))         
     
     # generate URL to map state counts using Google Map Chart 
     map_url = generate_trophy_map_chart_url(state_counts)
-        
-    return render_to_response('trophy.html', {"trophies_sorted":trophies_sorted, "state_counts_sorted":state_counts_sorted, "state_counts_total":state_counts_total, 'map_url':map_url}, context_instance=RequestContext(request))
+    popn_pie_chart_url = generate_pie_chart_source_popn(trophies)
+    freq_chart_url=generate_trophy_freq_chart(trophies)
+            
+    return render_to_response('trophy.html', {"trophies_sorted":trophies_sorted, "state_counts_sorted":state_counts_sorted, "state_counts_total":state_counts_total, 'map_url':map_url, 'popn_pie_chart_url':popn_pie_chart_url, "freq_chart_url": freq_chart_url}, context_instance=RequestContext(request))
 
 
 #-----------------------------------------------------------
@@ -397,11 +424,13 @@ def polar_bear_search(search_string):
 
     matching_docs = []
     
-    search_re = re.compile(r'.*' + search_string + ".*", re.DOTALL)
+    search_re = re.compile(r'.*' + search_string + r'.*', re.DOTALL)
 
     for d in FedRegDoc.objects.all():
-        if search_re(d.html_full_text):
-            matching_docs.append(d.pk)
+        if d.html_fulltext:
+            if search_re.search(d.html_full_text): 
+                print "found match in polar_bear_search for doc.pk:", d.pk  
+                matching_docs.append(d.pk)
 
     return matching_docs
     
