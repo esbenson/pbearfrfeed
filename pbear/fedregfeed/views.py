@@ -327,7 +327,7 @@ def extract_trophy_records_from_local(google_geocode_flag):
     #print "count", qset.count()
             
     # set up regex to extract trophy data from full html text (still problems with some false negs  and missing PRTs (permit numbers))
-    trophy_search_re = re.compile(r"Applicant:[ ]+(?P<app_name_prefix>Dr\.)?([ ]+)?(?P<app_name>[\w\s.-]+),?[ ]*(?P<app_name_suffix>III|IV|MD|Jr(\.)?|Sr(\.)?|Inc(\.)?)?,?[ ]+(?P<app_city>[ \w\.-]+),[ ]+(?P<app_state>\w\w)(,?[ ]+(?P<app_num>[-,\w\s]+))?(\.)?(\s+)?The applicant requests a permit to import a polar bear(.+?)from the[ ]+(?P<app_popn>[ \w]+)[ ]+polar bear population",re.DOTALL)
+    trophy_search_re = re.compile(r"(?P<app_num_pre>PRT-\w+)?[\s+]?Applicant:[ ]+(?P<app_name_prefix>Dr\.)?([ ]+)?(?P<app_name>[\w\s.-]+),?[ ]*(?P<app_name_suffix>III|IV|MD|Jr(\.)?|Sr(\.)?|Inc(\.)?)?,?[ ]+(?P<app_city>[ \w\.-]+),[ ]+(?P<app_state>\w\w)(,?[ ]+(?P<app_num>[-,\w\s]+))?(\.)?(\s+)?The applicant requests a permit to import a polar bear(.+?)from the[ ]+(?P<app_popn>[ \w]+)[ ]+polar bear population",re.DOTALL)
          
     # get applicant name, city, applicant date, etc. from each matching Fedregdoc
     for d in qset:
@@ -347,9 +347,12 @@ def extract_trophy_records_from_local(google_geocode_flag):
             # following line converts written-out name to two-letter abbrevs or "None" if not recognized as valid US state name
             app_state = abbrev_state_name_from_full(t.group('app_state')) 
             # following section makes sure permit number isn't just whitespace
-            app_num = t.group('app_num')
+            if t.group('app_num_pre'):
+                app_num = t.group('app_num_pre')
+            else:
+                app_num = t.group('app_num')
             if app_num:
-                if t.group('app_num').strip() == '':
+                if app_num.strip() == '':
                     app_num = None
 
             trophy_dict = {"app_date":app_date, "app_name":app_name, "app_name_suffix":app_name_suffix, "app_name_prefix":app_name_prefix, "app_city":app_city, "app_state":app_state, "app_num":app_num, "app_popn":app_popn, 'lat':None, 'lng':None}
