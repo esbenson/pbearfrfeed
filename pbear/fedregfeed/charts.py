@@ -370,3 +370,23 @@ def generate_bar_chart_by_agency_from_local():
     print "chart_url by agency", chart_url
     
     return chart_url
+    
+#------------------------------------------------------------------------------------------------------------
+#    helper for trophy_view - generates map url with markers
+#    would work except that it generates a map that is too big for Google Static Map API (too many markers)
+#
+#------------------------------------------------------------------------------------------------------------
+def generate_google_map_with_markers_url(trophies):
+    base_map_url = 'http://maps.googleapis.com/maps/api/staticmap'
+    map_size = "size=500x400"
+    sensor = "sensor=false"
+    marker_style = 'size:tiny|color:blue'
+    marker_locations = ''
+    for t in trophies:
+        marker_locations += str(t['lat']) + "," + str(t['lng']) + "|"        
+    markers = 'markers=' + marker_style + "|" + marker_locations[:-1] # strips last pipe char
+    map_params = map_size + "&" + markers + "&" + sensor
+    map_url = base_map_url + "?" + quote(map_params, '&')
+
+    return map_url
+

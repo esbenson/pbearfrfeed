@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.comments.moderation import CommentModerator, moderator
-
     
 class Agency(models.Model):
     url=models.CharField(max_length=200, null=True, blank=True)
@@ -26,23 +25,22 @@ class FedRegDoc(models.Model):
     json_url=models.CharField(max_length=200, null=True, blank=True)
     html_url=models.CharField(max_length=200, null=True, blank=True)
     pdf_url=models.CharField(max_length=200, null=True, blank=True)
-    # add field for pdf binary
     html_full_text = models.TextField(null=True, blank=True)
-    # add field for json
+    # add field for pdf binary?
+    # add field for json?
 
     def __unicode__(self):
         return self.title
-    
+
 class FedRegDocGloss(models.Model):
+    doc=models.ForeignKey(FedRegDoc)
     title=models.CharField(max_length=500)
-    datetime=models.DateTimeField() # set default for now?
+    datetime=models.DateTimeField()
     content=models.TextField(null=True, blank=True)
 
-    doc=models.OneToOneField(FedRegDoc)
-
     def __unicode__(self):
         return self.title
-    
+
 class FedRegDocModerator(CommentModerator):
     email_notification = False
  #   auto_close_field   = 'posted_date'
