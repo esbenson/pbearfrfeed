@@ -32,6 +32,16 @@ class FedRegDoc(models.Model):
     def __unicode__(self):
         return self.title
 
+class FedRegDocModerator(CommentModerator):
+    email_notification = False
+ #   auto_close_field   = 'posted_date'
+    # Close the comments after 7 days.
+  #  close_after        = 7
+
+moderator.register(FedRegDoc, FedRegDocModerator)
+
+
+## the following is currently unused
 class FedRegDocGloss(models.Model):
     doc=models.ForeignKey(FedRegDoc)
     title=models.CharField(max_length=500)
@@ -41,10 +51,3 @@ class FedRegDocGloss(models.Model):
     def __unicode__(self):
         return self.title
 
-class FedRegDocModerator(CommentModerator):
-    email_notification = False
- #   auto_close_field   = 'posted_date'
-    # Close the comments after 7 days.
-  #  close_after        = 7
-
-moderator.register(FedRegDoc, FedRegDocModerator)

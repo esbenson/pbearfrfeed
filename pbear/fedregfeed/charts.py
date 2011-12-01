@@ -90,6 +90,7 @@ def generate_freq_chart_url_from_local(search_term, start_year, end_year, month_
     count_notices = []
     count_presdocs = []
     count_unknown = []
+    count_total = []
     today = datetime.date.today()    
         
     for y in year_range:
@@ -113,9 +114,10 @@ def generate_freq_chart_url_from_local(search_term, start_year, end_year, month_
             count_notices.append(year_qset.filter(document_type='Notice').count())
             count_presdocs.append(year_qset.filter(document_type='Presidential Document').count())
             count_unknown.append(year_qset.filter(document_type='Document of Unknown Type').count())
+            count_total.append(count_unknown[-1] + count_presdocs[-1] + count_rules[-1] + count_proprules[-1] + count_notices[-1])
 
     # set up chart to display
-    largest_y = max(max(count_rules), max(count_proprules), max(count_notices), max(count_presdocs), max(count_unknown))
+    largest_y = max(count_total)
     if largest_y < 100:
         left_axis_step = 10
         max_y = 100
@@ -134,13 +136,14 @@ def generate_freq_chart_url_from_local(search_term, start_year, end_year, month_
     chart.set_axis_labels(Axis.LEFT, left_axis)
     chart.set_axis_labels(Axis.BOTTOM, bottom_axis)
     chart.set_grid(0, max(10, int(left_axis_step / 10)), 5, 5)
-    chart.set_colours(['0000FF', '00FF00', 'FF0000', 'FFFF00', '00FFFF'])
-    chart.set_legend(['Rules', 'Proposed Rules', 'Notices', 'Presidential Docs', 'Unknown'])
+    chart.set_colours(['0000FF', '00FF00', 'FF0000', 'FFFF00', '00FFFF', 'aaaaaa'])
+    chart.set_legend(['Rules', 'Proposed Rules', 'Notices', 'Presidential Docs', 'Unknown', 'Total'])
     chart.add_data(count_rules)
     chart.add_data(count_proprules)
     chart.add_data(count_notices)
     chart.add_data(count_presdocs)
     chart.add_data(count_unknown)
+    chart.add_data(count_total)
     chart_url = chart.get_url()
        
     return chart_url
