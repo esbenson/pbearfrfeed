@@ -6,6 +6,61 @@ import json
 import datetime
 import re
 
+STATE_DICT = {
+    "AL": 'Alabama', 
+    "AK": 'Alaska', 
+    "AZ": 'Arizona', 
+    "AR": 'Arkansas', 
+    "CA": 'California',
+    "CO": 'Colorado',
+    "CT": 'Connecticut', 
+    "DC": 'District of Columbia',
+    "DE": 'Delaware', 
+    "FL": 'Florida', 
+    "GA": 'Georgia',
+    "HI": 'Hawaii', 
+    "ID": 'Idaho', 
+    "IL": 'Illinois', 
+    "IN": 'Indiana', 
+    "IA": 'Iowa', 
+    "KS": 'Kansas', 
+    "KY": 'Kentucky', 
+    "LA": 'Louisiana', 
+    "ME": 'Maine', 
+    "MD": 'Maryland',
+    "MA": 'Massachusetts', 
+    "MI": 'Michigan', 
+    "MN": 'Minnesota', 
+    "MS": 'Mississippi', 
+    "MO": 'Missouri', 
+    "MT": 'Montana', 
+    "NE": 'Nebraska',
+    "NV": 'Nevada', 
+    "NH": 'New Hampshire', 
+    "NJ": 'New Jersey',
+    "NM": 'New Mexico', 
+    "NY": 'New York', 
+    "NC": 'North Carolina', 
+    "ND": 'North Dakota', 
+    "OH": 'Ohio', 
+    "OK": 'Oklahoma', 
+    "OR": 'Oregon',
+    "PA": 'Pennsylvania', 
+    "RI": 'Rhode Island', 
+    "SC": 'South Carolina',
+    "SD": 'South Dakota', 
+    "TN": 'Tennessee', 
+    "TX": 'Texas', 
+    "UT": 'Utah', 
+    "VT": 'Vermont', 
+    "VA": 'Virginia', 
+    "WA": 'Washington', 
+    "WV": 'West Virginia', 
+    "WI": 'Wisconsin', 
+    "WY": 'Wyoming',
+    "PR": "Puerto Rico"
+}
+
 #------------------------------
 # regularize popn names for trophy view
 #------------------------
@@ -13,49 +68,25 @@ def regularize_population_name(popn):
     if popn == None:
         return None
 
-    if popn == 'South Beaufort Sea':
+    p = popn.lower()
+    
+    if p == 'southern beaufort sea' or p == 'southern beafort sea' or p == 'south beaufort sea' or p == 'southern beaufort' or p == 'southern beauford' or p =='southern beauford sea':
         popn = 'Southern Beaufort Sea'
-    if popn == 'South Beaufort Sea':
-        popn = 'Southern Beaufort Sea'
-    if popn == 'Southern Beaufort':
-        popn = 'Southern Beaufort Sea'
-    if popn == 'Southern Beauford':
-        popn = 'Southern Beaufort Sea'
-    if popn == 'Southern Beauford Sea':
-        popn = 'Southern Beaufort Sea'
-    if popn == 'Southern Beauford sea':
-        popn = 'Southern Beaufort Sea'
-    if popn == 'Southern Beaufort sea':
-        popn = 'Southern Beaufort Sea'
-    if popn == 'Southern Beafort Sea':
-        popn = 'Southern Beaufort Sea'
-    if popn == 'northern Beaufort':
+    if p == 'northern beaufort' or  p == 'northern beaufort sea':
         popn = 'Northern Beaufort Sea'
-    if popn == 'northern Beaufort':
-        popn = 'Northern Beaufort Sea'
-    if popn == 'Northern Beaufort':
-        popn = 'Northern Beaufort Sea'
-    if popn == 'Northern Beaufort sea':
-        popn = 'Northern Beaufort Sea'
-    if popn == 'Lancaster sound':
+    if p == 'lancaster sound' or p == 'lancaster sound bay' or p == 'landcaster sound':
         popn = 'Lancaster Sound'
-    if popn == 'Landcaster Sound':
-        popn = 'Lancaster Sound'
-    if popn == 'Lancaster Sound Bay':
-        popn = 'Lancaster Sound'
-    if popn == 'Viscount Melville':
+    if p == 'viscount melville' or p == 'viscount mellville sound':
         popn = 'Viscount Melville Sound'
-    if popn == 'Viscount Mellville Sound':
-        popn = 'Viscount Melville Sound'
-    if popn == 'Davis Straight':
+    if p == 'davis straight':
         popn = 'Davis Strait'
-    if popn == 'Perry Channel':
+    if p == 'perry channel':
         popn = 'Parry Channel'
-    if popn == 'Fox Basin':
+    if p == 'fox basin':
         popn = 'Foxe Basin'
-    if popn == 'Norweigian Bay':
+    if p == 'norweigian bay':
         popn = 'Norwegian Bay'
-        
+
     return popn
         
 # -----------------------------------------------------------      
@@ -207,140 +238,27 @@ def update_database_from_fedreg(base_url, conditions):
 # -------------------------------------------------------------------------------------
 def full_state_name_from_abbrev(state):
     
-    state_dict = {
-        "AL": 'Alabama', 
-        "AK": 'Alaska', 
-        "AZ": 'Arizona', 
-        "AR": 'Arkansas', 
-        "CA": 'California',
-        "CO": 'Colorado',
-        "CT": 'Connecticut', 
-        "DC": 'District of Columbia',
-        "DE": 'Delaware', 
-        "FL": 'Florida', 
-        "GA": 'Georgia',
-        "HI": 'Hawaii', 
-        "ID": 'Idaho', 
-        "IL": 'Illinois', 
-        "IN": 'Indiana', 
-        "IA": 'Iowa', 
-        "KS": 'Kansas', 
-        "KY": 'Kentucky', 
-        "LA": 'Louisiana', 
-        "ME": 'Maine', 
-        "MD": 'Maryland',
-        "MA": 'Massachusetts', 
-        "MI": 'Michigan', 
-        "MN": 'Minnesota', 
-        "MS": 'Mississippi', 
-        "MO": 'Missouri', 
-        "MT": 'Montana', 
-        "NE": 'Nebraska',
-        "NV": 'Nevada', 
-        "NH": 'New Hampshire', 
-        "NJ": 'New Jersey',
-        "NM": 'New Mexico', 
-        "NY": 'New York', 
-        "NC": 'North Carolina', 
-        "ND": 'North Dakota', 
-        "OH": 'Ohio', 
-        "OK": 'Oklahoma', 
-        "OR": 'Oregon',
-        "PA": 'Pennsylvania', 
-        "RI": 'Rhode Island', 
-        "SC": 'South Carolina',
-        "SD": 'South Dakota', 
-        "TN": 'Tennessee', 
-        "TX": 'Texas', 
-        "UT": 'Utah', 
-        "VT": 'Vermont', 
-        "VA": 'Virginia', 
-        "WA": 'Washington', 
-        "WV": 'West Virginia', 
-        "WI": 'Wisconsin', 
-        "WY": 'Wyoming',
-        "PR": "Puerto Rico"
-    }
-    
     state = state.strip()
-    state = state_dict.get(state, state) # gets value in dict for state; if none, returns current value by default (i.e., leaves unchanged)
+    state = STATE_DICT.get(state, state) # gets value in dict for state; if none, returns current value by default (i.e., leaves unchanged)
      
     return state
-
 
 # -------------------------------------------------------------------------------------
 #   if recognized state abbrev, expands to full,
 #   otherwise returns it as it is except stripped of trailing and leading whitespace
 # -------------------------------------------------------------------------------------
 def abbrev_state_name_from_full(state):
-    
-    state_dict = {
-        "AL":'Alabama', 
-        "AK":'Alaska', 
-         "AZ": 'Arizona', 
-        "AR": 'Arkansas', 
-        "CA": 'California',
-        "CO": 'Colorado',
-        "CT": 'Connecticut', 
-        "DC": 'District of Columbia',
-        "DE": 'Delaware', 
-        "FL": 'Florida', 
-        "GA": 'Georgia',
-        "HI": 'Hawaii', 
-        "ID": 'Idaho', 
-        "IL": 'Illinois', 
-        "IN": 'Indiana', 
-        "IA": 'Iowa', 
-        "KS": 'Kansas', 
-        "KY": 'Kentucky', 
-        "LA": 'Louisiana', 
-        "ME": 'Maine', 
-        "MD": 'Maryland',
-        "MA": 'Massachusetts', 
-        "MI": 'Michigan', 
-        "MN": 'Minnesota', 
-        "MS": 'Mississippi', 
-        "MO": 'Missouri', 
-        "MT": 'Montana', 
-        "NE": 'Nebraska',
-        "NV": 'Nevada', 
-        "NH": 'New Hampshire', 
-        "NJ": 'New Jersey',
-        "NM": 'New Mexico', 
-        "NY": 'New York', 
-        "NC": 'North Carolina', 
-        "ND": 'North Dakota', 
-        "OH": 'Ohio', 
-        "OK": 'Oklahoma', 
-        "OR": 'Oregon',
-        "PA": 'Pennsylvania', 
-        "RI": 'Rhode Island', 
-        "SC": 'South Carolina',
-        "SD": 'South Dakota', 
-        "TN": 'Tennessee', 
-        "TX": 'Texas', 
-        "UT": 'Utah', 
-        "VT": 'Vermont', 
-        "VA": 'Virginia', 
-        "WA": 'Washington', 
-        "WV": 'West Virginia', 
-        "WI": 'Wisconsin', 
-        "WY": 'Wyoming',
-        "PR": "Puerto Rico"
-    }
-    
+
     new_state = None
     state = state.strip()
-    for abbrev,full in state_dict.iteritems():
+    for abbrev,full in STATE_DICT.iteritems():
         if state == full:
             new_state = abbrev
             break
         elif state == abbrev:
             new_state = abbrev
             break
-
-    print state, new_state
- 
+    print state, new_state 
     return new_state
 
 #-----------------------------------------------------------

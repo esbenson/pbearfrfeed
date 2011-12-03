@@ -15,6 +15,9 @@ $(function() {
             $("#show_hide").text("(+) show source data");
         }
     });
+    $("#show_hide").mouseover(function() {
+        $(this).css("cursor","pointer");
+    });
 });
 </script>
 {% endblock script %}
@@ -58,7 +61,7 @@ $(function() {
 
 
 <!-- show trophy source data details -->
-<div id="show_hide" style="font-style:italic;font-weight:bold;margin-top:30px;margin-bottom:20px;margin-left:auto; margin-right:auto; width:900px;text-align:center;align:center;">(+) show source data</div>
+<div id="show_hide" style="font-style:italic;font-weight:bold;margin-top:30px;margin-bottom:20px;margin-left:auto; margin-right:auto; width:300px;text-align:center;align:center;">(+) show source data</div>
 <div id="source_data" style="margin-left:auto; margin-right:auto; width:900px;text-align:center;font-size:10pt; align:center;display:none;" >
 <h2>Polar Bear Trophy Permit Application Source Data</h2>
     <table style="margin-left:auto; margin-right:auto; width:900px; font-size:8pt; text-align:left">

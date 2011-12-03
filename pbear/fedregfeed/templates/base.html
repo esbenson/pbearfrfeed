@@ -16,7 +16,7 @@
 <td width="100%" colspan="3" style="text-align:center">
 {% block header %}
 <h1 id="title"><a href={% url pbear_list_default %}>Polar Bear Feed</a></h1>
-<p style="font-style:italic">an automatically updated,  <a href="/feed" target="_blank" style="text-decoration:none">RSS-syndicated</a> list of <a href="http://www.federalregister.gov" target="_blank" style="text-decoration:none">Federal Register</a> items mentioning polar bears, 1994-present.<br>click on item titles for details and <a href="{% url pbear_list_default  %}">list view</a> to return to list.<br/>also available: a dynamically generated chart of <a href="{% url pbear_chart %}">polar-bear-related notices/year</a>,<br/>and visualizations of applications for polar bear <a href="{% url pbear_trophy_map %}">trophy import permits</a>.<br/>the &rArr; symbol indicates links to content on the official Federal Register site</p>
+<p style="font-style:italic">an automatically updated,  <a href="/feed" target="_blank" style="text-decoration:none">RSS-syndicated</a> list of <a href="http://www.federalregister.gov" target="_blank" style="text-decoration:none">Federal Register</a> items mentioning polar bears, 1994-present.<br>click on item titles for details and <a href="{% url pbear_list_default  %}">list view</a> to return to list.<br/>also available: a dynamically generated chart of <a href="{% url pbear_chart %}">polar-bear-related items/year</a>,<br/>and visualizations of applications for polar bear <a href="{% url pbear_trophy_map %}">trophy import permits</a>.<br/>the &rArr; symbol indicates links to content on the official Federal Register site</p>
 
 <p><a href="http://www.etiennebenson.com/polar-bears-in-the-federal-register" target="_blank">about</a></p>
 {% endblock header %}

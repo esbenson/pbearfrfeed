@@ -3,13 +3,10 @@ from django.http import Http404
 from django.template import RequestContext
 
 from urllib2 import urlopen, quote
-import re
-import json
-import datetime
+import re, json, datetime
 from operator import itemgetter
 
 from fedregfeed.models import FedRegDoc
-
 from utils import update_database_from_fedreg, full_state_name_from_abbrev, abbrev_state_name_from_full, regularize_population_name, extract_trophy_records_from_local, google_geocode
 from charts import generate_freq_chart_url_from_fedreg, generate_freq_chart_url_from_local, generate_bar_chart_by_agency_from_local, generate_trophy_map_chart_url, generate_pie_chart_source_popn, generate_trophy_freq_chart_url
 
@@ -22,7 +19,7 @@ from charts import generate_freq_chart_url_from_fedreg, generate_freq_chart_url_
 #
 # also, search functionality is not fully implemented
 # --------------------------------------------------------------------------------------------------------------
-def multiple_view(request, **kwargs):
+def search_result_view(request, **kwargs):
 
     # check for search arg
     try:
@@ -44,6 +41,7 @@ def multiple_view(request, **kwargs):
         display_num=int(kwargs['display_num'])
         print "display_num", display_num
     except KeyError:
+        print "no display number argument found"
         raise Http404
 
     # update the database if flag is set
@@ -60,8 +58,8 @@ def multiple_view(request, **kwargs):
             pass
         request_return = update_database_from_fedreg(fr_base_url, fr_conditions)
 
-    print "getting matching list of docs to search term (or all)"
     # get list of  docs matching search term, if there is a search term; otherwise get all
+    print "getting matching list of docs to search term (or all)"
     if search_term:
         doc_list = FedRegDoc.objects.filter(html_full_text__contains=search_term)
     else:
@@ -86,7 +84,7 @@ def multiple_view(request, **kwargs):
         display_offset = 0
     total_doc_count = doc_list.count()        
 
-    # set nav parameters
+    # set navigation parameters
     print "total_doc_count", total_doc_count
     print "setting nav parameters"
     if display_offset == 0:
@@ -122,6 +120,7 @@ def multiple_view(request, **kwargs):
 
 # --------------------------------------------------------------------------------------------------------------
 # the single view shows details for a single fedreg document based on primary key (pk) number
+# (and comments if enabled in display templates)
 # --------------------------------------------------------------------------------------------------------------
 def single_view(request, **kwargs):
 
@@ -189,6 +188,10 @@ def single_view(request, **kwargs):
 
 #-----------------------------------------------------------
 #   pbear chart_view
+#
+#   generates chart URL from local database for 
+#   given search term
+# 
 #-------------------------------------------------------------
 def chart_view(request, **kwargs):
 
@@ -204,18 +207,13 @@ def chart_view(request, **kwargs):
             print "invalid argument - ", k, " - passed to pbear_chart"
             raise Http404
 
-    month_flag = False
     # the following generates chart from local database
-    chart_url = generate_freq_chart_url_from_local(search_term, start_year, end_year, month_flag)  
-
-    # the following line generates a bar chart showing number of records per agency 
-    # bar_chart_url = generate_bar_chart_by_agency_from_local()
-    bar_chart_url = None
+    chart_url = generate_freq_chart_url_from_local(search_term, start_year, end_year, 700, 250) # last two parameters give size of chart graphic  
      
-    return render_to_response('chart.html', {"chart_url": chart_url, "bar_chart_url":bar_chart_url, "search_term":search_term, "end_year":end_year, "start_year":start_year}, context_instance=RequestContext(request))
+    return render_to_response('chart.html', {"chart_url": chart_url, "search_term":search_term, "end_year":end_year, "start_year":start_year}, context_instance=RequestContext(request))
 
 
-# ------------------------------------------------
+# ------------------------------------------------0
 #    add html_full_text to database
 #     (only if missing from record) 
 #

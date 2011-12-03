@@ -27,7 +27,6 @@ class FedRegDoc(models.Model):
     pdf_url=models.CharField(max_length=200, null=True, blank=True)
     html_full_text = models.TextField(null=True, blank=True)
     # add field for pdf binary?
-    # add field for json?
 
     def __unicode__(self):
         return self.title

@@ -80,7 +80,7 @@ def generate_freq_chart_url_from_fedreg(search_term, start_year, end_year):
 # --------------------------------------------------------------
 # generate chart url of frequencies of polar bear-related FR items - getting counts from local database 
 # -------------------------------------------------------------------------
-def generate_freq_chart_url_from_local(search_term, start_year, end_year, month_flag):
+def generate_freq_chart_url_from_local(search_term, start_year, end_year, sizex, sizey):
     ''' returns url for chart after querying local database '''
    
     year_range=range(start_year,end_year + 1)
@@ -94,45 +94,28 @@ def generate_freq_chart_url_from_local(search_term, start_year, end_year, month_
     today = datetime.date.today()    
         
     for y in year_range:
-        if month_flag:
-            for m in month_range:
-                first_day, last_day = calendar.monthrange(y, m)
-                start_date = datetime.date(y, m, 1)
-                end_date = datetime.date(y, m, last_day)
-                print "start end", start_date, end_date
-                month_qset = FedRegDoc.objects.filter(publication_date__range=(start_date, end_date))
-                count.append(month_qset.count())
-                # following truncates the search at the current date
-                if end_date > today:
-                    break
-        else:
-            start_date=datetime.date(y,1,1)
-            end_date=datetime.date(y,12,31)
-            year_qset= FedRegDoc.objects.filter(publication_date__range=(start_date, end_date))       
-            count_rules.append(year_qset.filter(document_type='Rule').count())
-            count_proprules.append(year_qset.filter(document_type='Proposed Rule').count())
-            count_notices.append(year_qset.filter(document_type='Notice').count())
-            count_presdocs.append(year_qset.filter(document_type='Presidential Document').count())
-            count_unknown.append(year_qset.filter(document_type='Document of Unknown Type').count())
-            count_total.append(count_unknown[-1] + count_presdocs[-1] + count_rules[-1] + count_proprules[-1] + count_notices[-1])
+        start_date=datetime.date(y,1,1)
+        end_date=datetime.date(y,12,31)
+        year_qset = FedRegDoc.objects.filter(publication_date__range=(start_date, end_date))
+        if search_term:
+            year_qset = year_qset.filter(html_full_text__contains=search_term)
+        count_rules.append(year_qset.filter(document_type='Rule').count())
+        count_proprules.append(year_qset.filter(document_type='Proposed Rule').count())
+        count_notices.append(year_qset.filter(document_type='Notice').count())
+        count_presdocs.append(year_qset.filter(document_type='Presidential Document').count())
+        count_unknown.append(year_qset.filter(document_type='Document of Unknown Type').count())
+        count_total.append(count_unknown[-1] + count_presdocs[-1] + count_rules[-1] + count_proprules[-1] + count_notices[-1])
 
-    # set up chart to display
+    # set up chart axis parameters
     largest_y = max(count_total)
-    if largest_y < 100:
-        left_axis_step = 10
-        max_y = 100
-    else:
-        left_axis_step = int(pow(10, int(log10(largest_y))) / 10) 
-        max_y = (int(largest_y / left_axis_step) * left_axis_step) + (left_axis_step * 2)
-    print "left", left_axis_step, "max_y", max_y
-    print "max_y", max_y
+    left_axis_step = int(pow(10, int(log10(largest_y)))) 
+    max_y = (int(largest_y / left_axis_step) * left_axis_step) + (left_axis_step * 2)
     left_axis = range(0, max_y + left_axis_step, left_axis_step)
     left_axis[0] = ""
-    if month_flag:
-        bottom_axis = year_range * 12 # need to fix to account for months
-    else:
-        bottom_axis = year_range
-    chart = SimpleLineChart(600, 300, y_range=[0, max_y])
+    bottom_axis = year_range
+
+    # generate chart url
+    chart = SimpleLineChart(sizex, sizey, y_range=[0, max_y])
     chart.set_axis_labels(Axis.LEFT, left_axis)
     chart.set_axis_labels(Axis.BOTTOM, bottom_axis)
     chart.set_grid(0, max(10, int(left_axis_step / 10)), 5, 5)
