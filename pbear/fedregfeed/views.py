@@ -8,33 +8,63 @@ from operator import itemgetter
 
 from fedregfeed.models import FedRegDoc
 from utils import update_database_from_fedreg, full_state_name_from_abbrev, abbrev_state_name_from_full, regularize_population_name, extract_trophy_records_from_local, google_geocode
-from charts import generate_freq_chart_url_from_fedreg, generate_freq_chart_url_from_local, generate_bar_chart_by_agency_from_local, generate_trophy_map_chart_url, generate_pie_chart_source_popn, generate_trophy_freq_chart_url
+from charts import generate_freq_chart_url_from_fedreg, generate_freq_chart_url_from_qset, generate_bar_chart_by_agency_from_local, generate_trophy_map_chart_url, generate_pie_chart_source_popn, generate_trophy_freq_chart_url
 
 
-# --------------------------------------------------------------------------------------------------------------
-#     the multiple view shows a list of records in the database
+
+#-----------------------------------------------------------
+#   home
 #
-# this should be changed so that it displays info from descs for each fedregodoc
-# (defaulting to displaying minimal FedRegDoc info if no associated description)
-#
-# also, search functionality is not fully implemented
-# --------------------------------------------------------------------------------------------------------------
-def search_result_view(request, **kwargs):
+#   generates chart URL from local database
+# 
+#-------------------------------------------------------------
+def home_view(request, **kwargs):
+    print "in home"
 
-    # check for search arg
+    # check for args
+    try:
+        update_database_flag = kwargs['update_database_flag']
+    except KeyError:
+        update_database_flag = False
+        
     try:
         search_term = kwargs['search_term']
     except KeyError:
         search_term = None
         print "no 'search_term' arg passed to multiple view"
+        raise Http404
 
-    # check for update arg
-    try:
-        update_database_flag = kwargs['update_database_flag']
-        print "update_database_flag value:", update_database_flag
-    except KeyError:
-        update_database_flag = False
-        print "no update_database_flag passed to multiple view"    
+    # update the database if flag is set
+    # if database contains docs already, then only search for more recent items than contained in database (ie., add a "gte" condition)
+    if update_database_flag:
+        print "updating database"
+        fr_base_url = 'http://api.federalregister.gov/v1/articles.json'
+        fr_conditions = 'conditions[term]=' + search_term         
+        try:
+            most_recent_doc_pub_date = FedRegDoc.objects.all().order_by('-publication_date')[0].publication_date
+            fr_conditions = fr_conditions + '&' + 'conditions[publication_date][gte]=' + most_recent_doc_pub_date.strftime("%m/%d/%Y")  
+        except IndexError:
+            print "no records found in database in multiple, starting from scratch"
+            pass
+        print "fr_conditions, {0}\n\n\n".format(fr_conditions)
+        request_return = update_database_from_fedreg(fr_base_url, fr_conditions)
+        print request_return
+
+    # generates chart from local database
+    qset = FedRegDoc.objects.all()
+    chart_url = generate_freq_chart_url_from_qset(qset, 600, 150) # last two parameters give size of chart graphic  
+     
+    return render_to_response('home.html', {"chart_url": chart_url, "search_term":search_term}, context_instance=RequestContext(request))
+
+
+
+# --------------------------------------------------------------------------------------------------------------
+#     the list view shows a list of records in the database
+#
+#
+# --------------------------------------------------------------------------------------------------------------
+def list_view(request, **kwargs):
+    search_term = None
 
     # there should always be a display_num parameter (i.e., number of items to display per page)    
     try:
@@ -43,20 +73,6 @@ def search_result_view(request, **kwargs):
     except KeyError:
         print "no display number argument found"
         raise Http404
-
-    # update the database if flag is set
-    # if database contains docs already, then only search for more recent items than contained in database (ie., add a "gte" condition)
-    if update_database_flag:
-        print "updating database"
-        fr_base_url = 'http://api.federalregister.gov/v1/articles.json'
-        fr_conditions = 'conditions[term]=\"polar bear\"|\"polar bears\"'         
-        try:
-            most_recent_doc_pub_date = FedRegDoc.objects.all().order_by('-publication_date')[0].publication_date
-            fr_conditions = fr_conditions + '&' + 'conditions[publication_date][gte]=' + most_recent_doc_pub_date.strftime("%m/%d/%Y")  
-        except IndexError:
-            print "no records found in database in multiple, starting from scratch"
-            pass
-        request_return = update_database_from_fedreg(fr_base_url, fr_conditions)
 
     # get list of  docs matching search term, if there is a search term; otherwise get all
     print "getting matching list of docs to search term (or all)"
@@ -115,14 +131,14 @@ def search_result_view(request, **kwargs):
                 
     print "rendering"
     # render html via template
-    return render_to_response('multiple.html', {"doc_list":doc_list, 'search_term':search_term, "doc_pk":doc_pk, "display_offset": display_offset, "display_num":display_num, "newest_pk":newest_pk, "newer_pk":newer_pk, "older_pk":older_pk, "oldest_pk":oldest_pk, "total_doc_count":total_doc_count}, context_instance=RequestContext(request))
+    return render_to_response('list.html', {"doc_list":doc_list, 'search_term':search_term, "doc_pk":doc_pk, "display_offset": display_offset, "display_num":display_num, "newest_pk":newest_pk, "newer_pk":newer_pk, "older_pk":older_pk, "oldest_pk":oldest_pk, "total_doc_count":total_doc_count}, context_instance=RequestContext(request))
 
 
 # --------------------------------------------------------------------------------------------------------------
-# the single view shows details for a single fedreg document based on primary key (pk) number
+# the detail view shows details for a single fedreg document based on primary key (pk) number
 # (and comments if enabled in display templates)
 # --------------------------------------------------------------------------------------------------------------
-def single_view(request, **kwargs):
+def detail_view(request, **kwargs):
 
     # set defaults
     comment_posted = False
@@ -183,63 +199,13 @@ def single_view(request, **kwargs):
             oldest_pk = None
         
     # render page
-    return render_to_response('single.html', {"doc":doc, "comment_posted":comment_posted, "newer_pk":newer_pk, "older_pk":older_pk, "newest_pk":newest_pk, "oldest_pk":oldest_pk}, context_instance=RequestContext(request))
-
-
-#-----------------------------------------------------------
-#   pbear chart_view
-#
-#   generates chart URL from local database for 
-#   given search term
-# 
-#-------------------------------------------------------------
-def chart_view(request, **kwargs):
-
-    for k,v in kwargs.iteritems():  
-        print k, v
-        if k=='search_term':
-            search_term = v
-        elif k=='end_year':
-            end_year = int(v)
-        elif k=='start_year': 
-            start_year = int(v)
-        else:
-            print "invalid argument - ", k, " - passed to pbear_chart"
-            raise Http404
-
-    # the following generates chart from local database
-    chart_url = generate_freq_chart_url_from_local(search_term, start_year, end_year, 700, 250) # last two parameters give size of chart graphic  
-     
-    return render_to_response('chart.html', {"chart_url": chart_url, "search_term":search_term, "end_year":end_year, "start_year":start_year}, context_instance=RequestContext(request))
-
-
-# ------------------------------------------------0
-#    add html_full_text to database
-#     (only if missing from record) 
-#
-#    this is meant to be a run-once function
-#    to avoid reloading entire database
-# ------------------------------------------------
-def add_html_full_text_to_all(request):
-    for d in FedRegDoc.objects.all():
-        print d.title
-        if not d.html_full_text:
-            try:
-                f=urlopen(d.html_url)
-                d.html_full_text=f.read()
-                f.close()
-                d.save()
-            except URLError:
-                print "URLError when opening ", d.html_url
-                
-    return render_to_response('add_html_full_text.html', {}, context_instance=RequestContext(request))
+    return render_to_response('detail.html', {"doc":doc, "comment_posted":comment_posted, "newer_pk":newer_pk, "older_pk":older_pk, "newest_pk":newest_pk, "oldest_pk":oldest_pk}, context_instance=RequestContext(request))
 
         
 # --------------------------------------------
-#    trophy map view
+#    visualizations view
 #---------------------------------------------
-def trophy_view(request, **kwargs):
-            
+def vis_view(request, **kwargs):         
     trophies = []
     trophies_sorted=[]
     state_counts = {}
@@ -272,11 +238,32 @@ def trophy_view(request, **kwargs):
     trophies_sorted.sort(key=itemgetter(0))         
     
     # generate URL to map state counts using Google Map Chart 
-    map_url = generate_trophy_map_chart_url(state_counts)
-    popn_pie_chart_url = generate_pie_chart_source_popn(trophies)
-    freq_chart_url=generate_trophy_freq_chart_url(trophies)
+    map_url = generate_trophy_map_chart_url(state_counts, 600, 350)
+    popn_pie_chart_url = generate_pie_chart_source_popn(trophies, 600, 200)
+    freq_chart_url=generate_trophy_freq_chart_url(trophies, 600, 150)
             
-    return render_to_response('trophy.html', {"trophies_sorted":trophies_sorted, "state_counts_sorted":state_counts_sorted, "state_counts_total":state_counts_total, 'map_url':map_url, 'popn_pie_chart_url':popn_pie_chart_url, "freq_chart_url": freq_chart_url}, context_instance=RequestContext(request))
+    return render_to_response('visualizations.html', {"trophies_sorted":trophies_sorted, "state_counts_sorted":state_counts_sorted, "state_counts_total":state_counts_total, 'map_url':map_url, 'popn_pie_chart_url':popn_pie_chart_url, "freq_chart_url": freq_chart_url}, context_instance=RequestContext(request))
 
 
+
+# ------------------------------------------------0
+#    add html_full_text to database
+#     (only if missing from record) 
+#
+#    this is meant to be a run-once function
+#    to avoid reloading entire database
+# ------------------------------------------------
+def add_html_full_text_to_all(request):
+    for d in FedRegDoc.objects.all():
+        print d.title
+        if not d.html_full_text:
+            try:
+                f=urlopen(d.html_url)
+                d.html_full_text=f.read()
+                f.close()
+                d.save()
+            except URLError:
+                print "URLError when opening ", d.html_url
+                
+    return render_to_response('add_html_full_text.html', {}, context_instance=RequestContext(request))
 

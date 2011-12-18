@@ -12,11 +12,11 @@ from operator import itemgetter
 # --------------------------------------------------------------
 # generate trophy map chart url - getting counts from FR api
 # -------------------------------------------------------------------------
-def generate_trophy_map_chart_url(state_counts):
+def generate_trophy_map_chart_url(state_counts, sizex, sizey):
 
     base_url = 'https://chart.googleapis.com/chart'
     map_type = "cht=map"
-    map_size = "chs=" + "600x400" 
+    map_size = "chs=" + str(sizex) + "x" + str(sizey) 
     map_states="chld=" 
     color_values = "chd=t:"
     for k,v in state_counts.iteritems():
@@ -80,9 +80,13 @@ def generate_freq_chart_url_from_fedreg(search_term, start_year, end_year):
 # --------------------------------------------------------------
 # generate chart url of frequencies of polar bear-related FR items - getting counts from local database 
 # -------------------------------------------------------------------------
-def generate_freq_chart_url_from_local(search_term, start_year, end_year, sizex, sizey):
-    ''' returns url for chart after querying local database '''
-   
+def generate_freq_chart_url_from_qset(qset, sizex, sizey):
+    ''' returns url for chart from given queryset '''
+    
+    end_year = qset.order_by('-publication_date')[0].publication_date.year
+    start_year = qset.order_by('publication_date')[0].publication_date.year
+    print "start {0}, end {1}".format(start_year, end_year)
+
     year_range=range(start_year,end_year + 1)
     month_range=range(1, 13)
     count_rules = []
@@ -96,15 +100,15 @@ def generate_freq_chart_url_from_local(search_term, start_year, end_year, sizex,
     for y in year_range:
         start_date=datetime.date(y,1,1)
         end_date=datetime.date(y,12,31)
-        year_qset = FedRegDoc.objects.filter(publication_date__range=(start_date, end_date))
-        if search_term:
-            year_qset = year_qset.filter(html_full_text__contains=search_term)
+        year_qset = qset.filter(publication_date__range=(start_date, end_date))
         count_rules.append(year_qset.filter(document_type='Rule').count())
         count_proprules.append(year_qset.filter(document_type='Proposed Rule').count())
         count_notices.append(year_qset.filter(document_type='Notice').count())
         count_presdocs.append(year_qset.filter(document_type='Presidential Document').count())
         count_unknown.append(year_qset.filter(document_type='Document of Unknown Type').count())
         count_total.append(count_unknown[-1] + count_presdocs[-1] + count_rules[-1] + count_proprules[-1] + count_notices[-1])
+    for i in [count_rules, count_proprules, count_notices, count_presdocs, count_unknown, count_total]:
+        print i
 
     # set up chart axis parameters
     largest_y = max(count_total)
@@ -134,7 +138,7 @@ def generate_freq_chart_url_from_local(search_term, start_year, end_year, sizex,
 #-------------------------------------------------------------------------------
 # generate url for google pie chart of source populations for trophy imports
 #-------------------------------------------------------------------------------    
-def generate_pie_chart_source_popn(trophies):
+def generate_pie_chart_source_popn(trophies, sizex, sizey):
     source_popn_counts = {}
     chart_data_labels = []
     chart_data = []
@@ -161,7 +165,7 @@ def generate_pie_chart_source_popn(trophies):
         chart_data.append(percent)
  
     # assemble chart url
-    chart = PieChart2D(700,250)
+    chart = PieChart2D(sizex,sizey)
     chart.add_data(chart_data)
     chart.set_colours(['0000FF'])
     chart.set_pie_labels(chart_labels)
@@ -172,7 +176,7 @@ def generate_pie_chart_source_popn(trophies):
 # ---------------------------------------------------------------
 #    generate chart of trophy applications by year
 # ---------------------------------------------------------------
-def generate_trophy_freq_chart_url(trophies):
+def generate_trophy_freq_chart_url(trophies, sizex, sizey):
 
     counts = []
     lancaster_counts = []
@@ -293,7 +297,7 @@ def generate_trophy_freq_chart_url(trophies):
         bottom_axis.append(y)
     max_count = max(max(sbeaufort_counts), max(nbeaufort_counts), max(other_counts), max(lancaster_counts))
     left_axis = range(0, max_count, 10)
-    chart = SimpleLineChart(600, 250, y_range=[0, max_count])
+    chart = SimpleLineChart(sizex, sizey, y_range=[0, max_count])
     chart.set_colours(['FFFF00', 'FF0000', '00FF00', '0000FF'])
     chart.set_legend(['Lancaster Sound', 'Northern Beaufort Sea', 'Southern Beaufort Sea', 'Other'])
     chart.set_axis_labels(Axis.LEFT, left_axis)

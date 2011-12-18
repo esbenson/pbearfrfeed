@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block script %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+<script>
+/* function to hide/show element on click */
+$(function() {
+    $("#show_hide").click(function() {
+        var display_val = $("#chart").css("display");
+        if (display_val == "none") {
+            $("#chart").css("display","inline");
+            $("#show_hide").text("(-) hide chart");
+        } else {
+            $("#chart").css("display","none");
+            $("#show_hide").text("(+) show chart");
+        }
+    });
+    $("#show_hide").mouseover(function() {
+        $(this).css("cursor","pointer")
+    });
+});
+</script>
+{% endblock script %}
+
+
+{% block title %}
+Polar Bear Feed
+{% endblock title %}
+
+{% block content %}
+<div style="margin-left:auto; margin-right:auto; text-align:left;width:600px;">
+
+    <p>The <strong>Polar Bear Feed</strong>is a dynamically updated chronological list of <em>U.S. Federal Register</em> items that mention polar bears from 1994 to the present. It also provides dynamically generated visualizations of data, including charts of permit applications for imports of polar bear trophies from Canada between 1997 and 2008.</p>
+
+    <p><strong>What it's good for</strong>: Environmentalists, animal protectionists, trophy hunters, and others can use the feed to easily keep track U.S. federal government actions relating to polar bears, including the drafting of new rules and regulations and the issuance of permits. (Note: The Polar Bear Feed is for informational purposes only; no guarantees of accuracy or completeness are made. For official regulatory texts and the opportunity to submit public comments, see the official <a href="http://ww.federalregister.gov" target="_blank">Federal Register</a> site and <a href="http://www.regulations.gov/" target="_blank">Regulations.gov</a>.)</p>
+
+    <p><strong>How it works</strong>: The application builds a local database by using the <a href="http://www.federalregister.gov/blog/learn/developers" target="_blank">Federal Register Application Programming Interface (API)</a> to search for the terms "polar bear" or "polar bears" in the full text of notices, rules, and other items in the <em>Federal Register</em>. It makes the results viewable as a browsable list, as an RSS feed, and as a detail view of each item, and it dynamically generates charts and maps based on the local database.</p>
+    
+    <p>Click on the links at the top of the page above to access the <a href="{% url pbear_list_default %}">list</a> of polar-bear-related FR items, some <a href="{% url pbear_vis %}">visualizations</a> related to the import of polar bear trophies from Canada, and the <a href="/feed" target="_blank">RSS feed</a>.</p>
+ 
+    {% if chart_url %}
+    <div style="margin-left:auto; margin-right:auto; width:600px;text-align:center;">
+        <h2>Polar-Bear-Related Items in the <em>Federal Register</em></h2>
+        <img src="{{ chart_url }}"/>
+    </div>
+    {% endif %}
+
+
+    <p><strong>Some background</strong>: <a href="http://eol.org/pages/328580/overview" target="_blank"><em>Ursus maritimus</em></a>, the polar bear, has been the focus of international conservation efforts since the 1960s and in recent years has come to symbolize the threat of global climate change. In 2008, the <a href="http://www.fws.gov/" target="_blank">U.S. Fish and Wildlife Service</a> took the historic step of listing the polar bear as "threatened" under the <a href="http://www.fws.gov/endangered/laws-policies/" target="_blank">Endangered Species Act of 1973</a> because of the likelihood that global warming would lead to shrinking habitats for the species -- specifically, less ice.</p>
+
+    <p>One of the most immediate consequences of the ESA listing was the end of a program under which American sport-hunters had been allowed to import trophies of polar bears killed in Canada. Killing polar bears for sport and importing polar bear parts for personal use (e.g., as trophies) had been illegal in the United States since 1972, when the species was protected by the <a href="http://mmc.gov/legislation/mmpa.shtml" target="_blank">Marine Mammal Protection Act</a>, an important predecessor of the ESA. (Alaska Natives were still free to kill bears under certain conditions.)</P>
+    
+    <p>In Canada, in contrast, where the majority of the world's polar bears reside, hunting had been regulated but legal. Amendments to the MMPA in 1994 made it possible for American hunters to bring back their Canadian trophies. Advocates of the measure argued that Canada's polar bear population was large and well-managed, and that license and guide fees would help support arctic communities and polar bear conservation.</p>
+
+    <p>The 2008 "threatened" listing shut the door on trophy imports, including the import of parts from bears already killed by American hunters. Ever since, the <a href="http://www.scifirstforhunters.org/articles/index.cfm?action=view&amp;Article_ID=3292" target="_blank">Safari Club International</a>, the <a href="http://www.boone-crockett.org/about/positions_polarbear.asp?area=about&amp;ID=6B455080&amp;se=1&amp;te=1" target="_blank">Boone and Crockett Club</a>, the <a href="http://www.nrahuntersrights.org/Article.aspx?id=1682" target="_blank">National Rifle Association</a>, and other hunting advocates have been trying to roll back the listing, or at least to allow trophies from animals that had been killed before the listing to be imported, while the <a href="http://switchboard.nrdc.org/blogs/awetzler/polar_bear_trophy_hunters_in_t.html" target="_blank">Natural Resources Defense Council</a>, the <a href="http://hsus.typepad.com/wayne/2011/10/polar-bear-protection.html" target="_blank">Humane Society of the United States</a>, and other environmental and animal welfare/rights groups have defended the ban on importation. Recent court decisions have supported the listing and the ban, but it's likely that the issue will continue to be controversial as long as trophy hunting of polar bears remains legal in Canada.</p>
+
+    <p>The Polar Bear Feed takes advantage of recent developments in open government, particularly the development of a powerful and easy-to-use web service for the <a href="http://www.federalregister.gov/" target="_blank">Federal Register</a> that make it possible to quickly gather and analyze some of the crucial primary sources for the recent history of U.S. federal protections for polar bears: namely, all of the material about federal regulatory actions that has been published in the <em>Federal Register</em> since it first went electronic in 1994.</p>
+
+    <p>More technical details on the Polar Bear Feed are available <a href="http://etiennebenson.com/polar-bears-in-the-federal-register/" target="_blank">here</a>.</p>
+</div>
+
+
+
+
+
+<!-- for search .....
+    {% if form %}
+    <form action="/" method="post">{% csrf_token %}
+        {{form.as_p}}
+    <input type="submit" value="Search" name="Search"/>
+    <input type="submit" value="Show All" name="Show All"/>
+    </form>
+    {% endif %}
+-->
+
+<!--    {% if chart_url %}
+        {% if search_result_pks %}
+            <div id="show_hide" style="font-style:italic;font-weight:bold;text-align:center;">(+) show chart</div>
+            <div id="chart" style="margin-left:auto; margin-right:auto; width:600px;text-align:center;display:none;">
+        {% else %}
+            <div id="show_hide" style="font-style:italic;font-weight:bold;text-align:center;">(-) hide chart</div>
+            <div id="chart" style="margin-left:auto; margin-right:auto; width:600px;text-align:center;display:inline;">
+        {% endif %}
+            <img src="{{ chart_url }}"/>
+        </div>
+    {% endif %}
+-->
+<!--
+        {% if search_result_pks %}
+            <table>
+                {% for doc in display_list %}                       
+                 <tr>     
+                 <td width="100"><span class="doc_date" >{{doc.publication_date}}</span></td>
+                <td>
+                     <span class="doc_title" style="font-weight:bold;" ><a href="{% url pbear_single_pk doc_pk=doc.pk %}">{{doc.title}}</a></span> <br/>                   
+                </td></tr>
+                {% endfor %}             
+            </table>
+        {% else %}
+                <p>nothing found</p>
+        {% endif %}
+-->
+
+{% endblock content %}
+
+

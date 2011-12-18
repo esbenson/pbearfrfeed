@@ -33,11 +33,12 @@ $(function() {
 
     <!-- show map of state counts -->
     {% if map_url %}
+        <div style="text-align:left; padding:20px;">
         <h2>Applications for Polar Bear Trophy Import Permits by State of Applicant</h2>
         <img src="{{ map_url }}"/>
 
         <!-- show state/count details -->
-        <div style="text-align:left"><span style="font-weight:bold">Number of Permit Applications per State</span>: {% for s in state_counts_sorted %}
+        <br/><span style="font-weight:bold">Number of Permit Applications per State</span>: {% for s in state_counts_sorted %}
                 <span style="font-style:italic">{{s.0}}</span>: {{s.1}}{% if not forloop.last %},{% endif %}
             {% endfor %}. <span style="font-style:italic">TOTAL</span>: {{ state_counts_total }}. <span style="font-weight:bold">Note</span>: These figures were calculated from the list given below, which was automatically generated and may include errors and omissions.
         </div>
@@ -46,13 +47,17 @@ $(function() {
 
 <!-- show pie chart of source populations -->
 {% if popn_pie_chart_url %}
+        <div style="text-align:left; padding:20px;">
         <h2>Polar Bear Trophy Import Permit Applications by Source Population</h2>
         <img src="{{ popn_pie_chart_url }}"/>
+    </div>
 {% endif %}
 
 {% if freq_chart_url %}
-        <h2>Polar Bear Trophy Import Permit Applications by Year and Source Population</h2>
+        <div style="text-align:left; padding:20px;">
+        <h2>Polar Bear Trophy Import Permit Applications by Source Population Over Time</h2>
         <img src="{{ freq_chart_url }}"/>
+    </div>
 {% endif %}
 
 </div>    

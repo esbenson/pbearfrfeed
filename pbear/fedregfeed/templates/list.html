@@ -1,23 +1,24 @@
 {% extends "base.html" %}
 
-{% block newnav %}
+
+{% block nav %}
+<div style="padding:10px;padding-top:20px;text-align:center;width:50%;margin-left:auto;margin-right:auto">
+            <span style="font-style:italic;">
+            {% if newest_pk %}
+                <a class="nav" href="{% url pbear_list doc_pk=newest_pk  %}">&larr;&larr;newest</a>
+            {% else %}
+                &larr;&larr;newest
+            {% endif %}
             {% if newer_pk %} 
                 <a class="nav" href="{% url pbear_list doc_pk=newer_pk  %}">&larr;newer</a>
             {% else %}
                 &larr;newer
             {% endif %}
-            {% if newest_pk %} 
-                <a class="nav" href="{% url pbear_list doc_pk=newest_pk  %}">&larr;&larr;newest</a>
-            {% else %}
-                &larr;&larr;newest
-            {% endif %}
-{% endblock newnav %}
-
-{% block listnav %}
-            <p>Records {{display_offset|add:1}}-{{display_offset|add:display_num}} of {{total_doc_count}}</P>
-{% endblock listnav %}
-
-{% block oldnav %}
+            </span>
+            
+            <span style="font-weight:bold">( {{display_offset|add:1}}-{{display_offset|add:display_num}} of {{total_doc_count}} )</span>
+            
+            <span style="font-style:italic;">
             {% if older_pk %} 
                 <a class="nav" href="{% url pbear_list doc_pk=older_pk   %}">older&rarr;</a>    
             {% else %}
@@ -28,20 +29,20 @@
             {% else %}
                 oldest&rarr;&rarr;
             {% endif %}
-{% endblock oldnav %}
+            </span>
 
+</div>
+{% endblock nav %}
 
 {% block content %}
+        <div style="width:500px; text-align:left;margin-left:auto;margin-right:auto">
         {% if doc_list %}            
             {% load comments %}
 
-        <table>
-            {% for doc in doc_list %}    
-                   
-             <tr>     
-             <td width="100"><span class="doc_date" >{{doc.publication_date}}</span></td>
-            <td>
-                 <span class="doc_title" style="font-weight:bold;" ><a href="{% url pbear_single_pk doc_pk=doc.pk %}">{{doc.title}}</a></span> <br/>  
+            {% for doc in doc_list %}
+            
+            <p><span class="doc_date" >{{doc.publication_date}}</span>
+                 <span class="doc_title" style="font-weight:normal;" ><a href="{% url pbear_detail_pk doc_pk=doc.pk %}" style="text-decoration:none">{{doc.title}}</a></span></p>  
                  
                  <!--
                  <span class="doc_type">{{doc.document_type}}</span> &bull;  
@@ -73,13 +74,13 @@
                </p>
             -->
             
-            </td></tr>
             {% endfor %}
             
-            
-              </table>
         {% else %}
             <p>nothing found</p>
         {% endif %}
-
+    </div>
+    
 {% endblock content %}
+
+

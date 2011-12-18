@@ -6,60 +6,7 @@ import json
 import datetime
 import re
 
-STATE_DICT = {
-    "AL": 'Alabama', 
-    "AK": 'Alaska', 
-    "AZ": 'Arizona', 
-    "AR": 'Arkansas', 
-    "CA": 'California',
-    "CO": 'Colorado',
-    "CT": 'Connecticut', 
-    "DC": 'District of Columbia',
-    "DE": 'Delaware', 
-    "FL": 'Florida', 
-    "GA": 'Georgia',
-    "HI": 'Hawaii', 
-    "ID": 'Idaho', 
-    "IL": 'Illinois', 
-    "IN": 'Indiana', 
-    "IA": 'Iowa', 
-    "KS": 'Kansas', 
-    "KY": 'Kentucky', 
-    "LA": 'Louisiana', 
-    "ME": 'Maine', 
-    "MD": 'Maryland',
-    "MA": 'Massachusetts', 
-    "MI": 'Michigan', 
-    "MN": 'Minnesota', 
-    "MS": 'Mississippi', 
-    "MO": 'Missouri', 
-    "MT": 'Montana', 
-    "NE": 'Nebraska',
-    "NV": 'Nevada', 
-    "NH": 'New Hampshire', 
-    "NJ": 'New Jersey',
-    "NM": 'New Mexico', 
-    "NY": 'New York', 
-    "NC": 'North Carolina', 
-    "ND": 'North Dakota', 
-    "OH": 'Ohio', 
-    "OK": 'Oklahoma', 
-    "OR": 'Oregon',
-    "PA": 'Pennsylvania', 
-    "RI": 'Rhode Island', 
-    "SC": 'South Carolina',
-    "SD": 'South Dakota', 
-    "TN": 'Tennessee', 
-    "TX": 'Texas', 
-    "UT": 'Utah', 
-    "VT": 'Vermont', 
-    "VA": 'Virginia', 
-    "WA": 'Washington', 
-    "WV": 'West Virginia', 
-    "WI": 'Wisconsin', 
-    "WY": 'Wyoming',
-    "PR": "Puerto Rico"
-}
+from myconstants import STATE_DICT, STOP_WORDS
 
 #------------------------------
 # regularize popn names for trophy view
@@ -72,19 +19,19 @@ def regularize_population_name(popn):
     
     if p == 'southern beaufort sea' or p == 'southern beafort sea' or p == 'south beaufort sea' or p == 'southern beaufort' or p == 'southern beauford' or p =='southern beauford sea':
         popn = 'Southern Beaufort Sea'
-    if p == 'northern beaufort' or  p == 'northern beaufort sea':
+    elif p == 'northern beaufort' or  p == 'northern beaufort sea':
         popn = 'Northern Beaufort Sea'
-    if p == 'lancaster sound' or p == 'lancaster sound bay' or p == 'landcaster sound':
+    elif p == 'lancaster sound' or p == 'lancaster sound bay' or p == 'landcaster sound':
         popn = 'Lancaster Sound'
-    if p == 'viscount melville' or p == 'viscount mellville sound':
+    elif p == 'viscount melville' or p == 'viscount mellville sound':
         popn = 'Viscount Melville Sound'
-    if p == 'davis straight':
+    elif p == 'davis straight':
         popn = 'Davis Strait'
-    if p == 'perry channel':
+    elif p == 'perry channel':
         popn = 'Parry Channel'
-    if p == 'fox basin':
+    elif p == 'fox basin':
         popn = 'Foxe Basin'
-    if p == 'norweigian bay':
+    elif p == 'norweigian bay':
         popn = 'Norwegian Bay'
 
     return popn
@@ -392,4 +339,26 @@ def strip_polar_bear_html(html_full_text):
     full_text_stripped = re.sub(r"Northern Beaufort population polar bear population", "Northern Beaufort polar bear population", full_text_stripped)
      
     return full_text_stripped        
+
+# --------------------------------------------------------------
+#    count appearances of (alphanumeric) words in search_string
+#   omits stop_words
+# returns a dict of {word:count}
+# --------------------------------------------------------------
+def word_freq(search_string, stop_words):
+    freq_dict = {}    
+
+    string_list = re.split(r'\W+', search_string) # split at non-alphanumeric characters
+        
+    for w in string_list:
+        if len(w) > 0: # only non-empty strings
+            if not re.search(r'\b'+ w + r'\b', stop_words): # exclude stop words; match only at word boundaries
+                try:
+                    freq_dict[w] += 1
+                except KeyError:
+                    freq_dict[w] = 1
+            
+    return freq_dict
+
+
 
