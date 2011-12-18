@@ -17,9 +17,9 @@ def regularize_population_name(popn):
 
     p = popn.lower()
     
-    if p == 'southern beaufort sea' or p == 'southern beafort sea' or p == 'south beaufort sea' or p == 'southern beaufort' or p == 'southern beauford' or p =='southern beauford sea':
+    if p == 'southern beaufort sea' or p == 'southern beafort sea' or p == 'south beaufort sea' or p == 'southern beaufort' or p == 'southern beauford' or p =='southern beauford sea' or p == 's. beaufort':
         popn = 'Southern Beaufort Sea'
-    elif p == 'northern beaufort' or  p == 'northern beaufort sea':
+    elif p == 'northern beaufort' or  p == 'northern beaufort sea' or p == 'n. beaufort':
         popn = 'Northern Beaufort Sea'
     elif p == 'lancaster sound' or p == 'lancaster sound bay' or p == 'landcaster sound':
         popn = 'Lancaster Sound'
@@ -93,7 +93,7 @@ def fetch_fedreg_results_page(url):
     return page
 
 # -----------------------------------------------------------      
-#     add obj to database
+#     add single obj to database
 # -----------------------------------------------------------        
 def add_object_to_database(d):
     try:
@@ -185,38 +185,36 @@ def update_database_from_fedreg(base_url, conditions):
 # -------------------------------------------------------------------------------------
 def full_state_name_from_abbrev(state):
     
-    state = state.strip()
-    state = STATE_DICT.get(state, state) # gets value in dict for state; if none, returns current value by default (i.e., leaves unchanged)
-     
-    return state
+    state = state.strip().upper()
+    new_state = STATE_DICT.get(state, state) # gets value in dict for state; if none, returns current value by default (i.e., leaves unchanged, except for whitespace strip) 
+    return new_state
 
 # -------------------------------------------------------------------------------------
-#   if recognized state abbrev, expands to full,
+#   if recognized state full name, returns two-letter abbrev,
 #   otherwise returns it as it is except stripped of trailing and leading whitespace
 # -------------------------------------------------------------------------------------
 def abbrev_state_name_from_full(state):
 
     new_state = None
-    state = state.strip()
+    state = state.strip().upper()
     for abbrev,full in STATE_DICT.iteritems():
-        if state == full:
+        if state == full.upper():
             new_state = abbrev
             break
         elif state == abbrev:
             new_state = abbrev
             break
-    print state, new_state 
     return new_state
 
 #-----------------------------------------------------------
 #      polar bear search
 #      should return a list of matching primary keys to FedRegDocs
 #-----------------------------------------------------------
-def polar_bear_search(search_string):
+def polar_bear_search(regex):
 
     matching_docs = []
     
-    search_re = re.compile(r'.*' + search_string + r'.*', re.DOTALL)
+    search_re = re.compile(regex, re.DOTALL)
 
     for d in FedRegDoc.objects.all():
         if d.html_fulltext:
@@ -238,21 +236,83 @@ def extract_trophy_records_from_local(google_geocode_flag):
     trophy_dict = {}
     
     # find all records that contain permit apps for trophy import - basically, use a first pass in the database to speed up search
-    qset = FedRegDoc.objects.filter(html_full_text__contains="applicant requests a permit to import a polar bear")
-    qset = qset.filter(html_full_text__contains="sport")
-    #print "count", qset.count()
-            
-    # set up regex to extract trophy data from full html text (still problems with some false negs  and missing PRTs (permit numbers))
-    trophy_search_re = re.compile(r"(?P<app_num_pre>PRT-\w+)?[\s+]?Applicant:[ ]+(?P<app_name_prefix>Dr\.)?([ ]+)?(?P<app_name>[\w\s.-]+),?[ ]*(?P<app_name_suffix>III|IV|MD|Jr(\.)?|Sr(\.)?|Inc(\.)?)?,?[ ]+(?P<app_city>[ \w\.-]+),[ ]+(?P<app_state>\w\w)(,?[ ]+(?P<app_num>[-,\w\s]+))?(\.)?(\s+)?The applicant requests a permit to import a polar bear(.+?)from the[ ]+(?P<app_popn>[ \w]+)[ ]+polar bear population",re.DOTALL)
-         
-    # get applicant name, city, applicant date, etc. from each matching Fedregdoc
+    #qset = FedRegDoc.objects.filter(html_full_text__contains="sport-hunted")
+    qset = FedRegDoc.objects.all()
+    print "count: {0}".format(qset.count())
+                
+    # compile regexes to extract trophy data from full html text (still problems with some false negs and missing PRTs (permit numbers))
+    trophy_indiv_re = re.compile(r"(?P<app_num_pre>PRT-\w+)?[\s+]?Applicant:[ ]+(?P<app_name_prefix>Dr\.)?([ ]+)?(?P<app_name>[\w\s.-]+),?[ ]*(?P<app_name_suffix>III|IV|MD|Jr(\.)?|Sr(\.)?|Inc(\.)?)?,?[ ]+(?P<app_city>[ \w\.-]+),[ ]+(?P<app_state>\w\w)(,?[ ]+(?P<app_num>[-,\w\s]+))?(\.)?(\s+)?The applicant requests a permit to import a( sport-hunted)? polar bear(.+?)from the[ ]+(?P<app_popn>[ \w]+)[ ]+polar bear population",re.DOTALL)
+    
+    trophy_grouped_re = re.compile (r'The following applicants have each requested a permit to import a(\s+sport-hunted)? polar bear \(Ursus maritimus\) from the (?P<population>.*) for personal use\.(?P<content>.*)Written data or comments', re.DOTALL)
+     #(Ursus maritimus) from the Northwest Territories, Canada for personal use', re.DOTALL) # \.(?P<grouped_app>.*)Written data or comments', re.DOTALL)
+    trophy_grouped_indiv_re = re.compile(r'\n(?P<app_name_prefix>Dr\.)?([ ]+)?(?P<app_name>[\w\s.-]+),?[ ]*(?P<app_name_suffix>III|IV|MD|Jr(\.)?|Sr(\.)?|Inc(\.)?)?,?[ ]+(?P<app_city>[ \w\.-]+),[ ]+(?P<app_state>\w\w)[\.\s]+(?P<app_popn>[ \w]+)[\.\s]+(?P<app_num>\d+)', re.DOTALL)
+        
+    # get applicant name, city, applicant date, etc. from each matching Fedregdoc    
     for d in qset:
+        print d.publication_date
         # following strips html tags (roughly), replace all whitespace with spaces, and deal with a couple of specific problems with source material
         # (if data is available as json, this would be a better place to start than the current approach)
         full_text_stripped = strip_polar_bear_html(d.html_full_text)
+        
+        # checks for grouped applications in this doc
+        grouped = trophy_grouped_re.search(full_text_stripped)
+        if grouped:
+            #print "grouped app found:\n{0}".format(grouped.group())
+            #print "population:{0}".format(grouped.group('population'))
+             
+            if grouped.group('population') == 'Lancaster Sound or Norwegian Bay populations, Northwest Territories, Canada':
+                result = re.search(r'Lancaster Sound Populations(?P<lancaster>.*)Norwegian Bay Populations(?P<norwegian>.*)', grouped.group('content'), re.DOTALL)
+                for popn in ['lancaster', 'norwegian']:
+                    for t in re.finditer(r'(?P<app_name_prefix>Dr\.)?([ ]+)?(?P<app_name>[\w\s.-]+),?[ ]*(?P<app_name_suffix>III|IV|MD|Jr(\.)?|Sr(\.)?|Inc(\.)?)?,?[ ]+(?P<app_city>[ \w\.-]+),[ ]+(?P<app_state>\w\w)[\.\s]+(?P<app_num>\d+\s+)', result.group(popn), re.DOTALL):
+                        app_date = d.publication_date    
+                        app_name = t.group('app_name')
+                        app_name_suffix = t.group('app_name_suffix')
+                        app_name_prefix = t.group('app_name_prefix')
+                        app_city = t.group('app_city')
+                        app_state = t.group('app_state')
+                        if popn == 'lancaster':
+                            app_popn = 'Lancaster Sound'
+                        elif popn == 'norwegian':
+                            app_popn = 'Norwegian Bay'
+                        app_state = abbrev_state_name_from_full(t.group('app_state')) # full name --> two-letter abbrevs or "None" if not recognized as valid US state name
+                        app_num = t.group('app_num')
+                        if app_num:
+                            if app_num.strip() == '':
+                                app_num = None
+                        trophy_dict = {"app_date":app_date, "app_name":app_name, "app_name_suffix":app_name_suffix, "app_name_prefix":app_name_prefix, "app_city":app_city, "app_state":app_state, "app_num":app_num, "app_popn":app_popn, 'lat':None, 'lng':None}
+                        print trophy_dict                        
+                        trophies.append(trophy_dict)       
 
-        # following loops through all the re matches for this document 
-        for t in trophy_search_re.finditer(full_text_stripped):
+            elif grouped.group('population') == 'Northwest Territories, Canada':
+                print grouped.group('population')
+                #print grouped.group('content')
+                content = re.search(r'PRT-?\s+-*\s+(\w.*)\s+-*', grouped.group('content'), re.DOTALL)
+                print content.group(1)
+               
+                for t in re.finditer(r'(?P<app_name_prefix>Dr\.)?([ ]+)?(?P<app_name>[\w\s.\'-]+),?[ ]*(?P<app_name_suffix>III|IV|MD|Jr(\.)?|Sr(\.)?|Inc(\.)?)?,?[ ]+(?P<app_city>[ \w\.-]+),[ ]+(?P<app_state>\w\w)[\.\s]+(?P<app_popn>[\w\s.-]+)[\.\s]+(?P<app_num>\d+\s+)', content.group(1), re.DOTALL):
+                    app_date = d.publication_date
+                    app_name = t.group('app_name')
+                    app_name_suffix = t.group('app_name_suffix')
+                    app_name_prefix = t.group('app_name_prefix')
+                    app_city = t.group('app_city')
+                    app_state = t.group('app_state')                    
+                    if t.group('app_popn').strip('.') == 'do':
+                        app_popn = app_popn #i.e., if "do"[ditto] where population name should be, use value from previous
+                    else:
+                        app_popn = t.group('app_popn').strip('.')
+                    app_state = abbrev_state_name_from_full(t.group('app_state')) # full name --> two-letter abbrevs or "None" if not recognized as valid US state name
+                    app_num = t.group('app_num')
+                    if app_num:
+                        if app_num.strip() == '':
+                            app_num = None
+                    trophy_dict = {"app_date":app_date, "app_name":app_name, "app_name_suffix":app_name_suffix, "app_name_prefix":app_name_prefix, "app_city":app_city, "app_state":app_state, "app_num":app_num, "app_popn":app_popn, 'lat':None, 'lng':None}
+                    print trophy_dict
+                    trophies.append(trophy_dict)       
+            else:
+                print "UNRECOGNIZED POPULATION in groups" 
+
+        # loops through all the re matches for indiv app listings in this document 
+        for t in trophy_indiv_re.finditer(full_text_stripped):
             app_date = d.publication_date    
             app_name = t.group('app_name')
             app_name_suffix = t.group('app_name_suffix')
@@ -337,7 +397,20 @@ def strip_polar_bear_html(html_full_text):
     full_text_stripped = re.sub(r"Back to Top", " ", full_text_stripped)
     full_text_stripped = re.sub(r"Lancaster Sound polar bear from the Lancaster Sound", "Lancaster Sound", full_text_stripped)
     full_text_stripped = re.sub(r"Northern Beaufort population polar bear population", "Northern Beaufort polar bear population", full_text_stripped)
+    full_text_stripped = re.sub(r"Jerome Bofferding, Maple Grove,", "Jerome Bofferding, Maple Grove, MN...",  full_text_stripped)
+    full_text_stripped = re.sub(r"Richard Haskins, Hillsborough,", "Richard Haskins, Hillsborough, CA...",  full_text_stripped)
+    full_text_stripped = re.sub(r"Larry K. Bennett, Stewartstown,", "Larry K. Bennett, Stewartstown, PA...",  full_text_stripped)
+    full_text_stripped = re.sub(r"Dom DiPlacido, Prospect Park,", "Dom DiPlacido, Prospect Park, PA...",  full_text_stripped)
+    full_text_stripped = re.sub(r"Craig Leerberg, Colorado", "Craig Leerberg, Colorado Springs, CO...",  full_text_stripped)
+    full_text_stripped = re.sub(r"Anthony Kozyrski, Kings Park,", "Anthony Kozyrski, Kings Park, NY...",  full_text_stripped)
      
+    full_text_stripped = re.sub(r"PA. Jerrie Eaton", "Jerrie Eaton",  full_text_stripped)
+    full_text_stripped = re.sub(r"CA. Jerome Bofferding", "Jerome Bofferding",  full_text_stripped)
+    full_text_stripped = re.sub(r"MN. Dom DiPlacido", "Dom DiPlacido",  full_text_stripped)
+    full_text_stripped = re.sub(r"PA. Robert Van Horn", "Robert Van Horn",  full_text_stripped)
+    full_text_stripped = re.sub(r"CO. Peter La Haye", "Peter La Haye",  full_text_stripped)
+    full_text_stripped = re.sub(r"NY. Joseph A. Smith", "Joseph A. Smith",  full_text_stripped)
+        
     return full_text_stripped        
 
 # --------------------------------------------------------------

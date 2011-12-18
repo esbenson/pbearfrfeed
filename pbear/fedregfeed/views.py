@@ -11,11 +11,12 @@ from utils import update_database_from_fedreg, full_state_name_from_abbrev, abbr
 from charts import generate_freq_chart_url_from_fedreg, generate_freq_chart_url_from_qset, generate_bar_chart_by_agency_from_local, generate_trophy_map_chart_url, generate_pie_chart_source_popn, generate_trophy_freq_chart_url
 
 
-
 #-----------------------------------------------------------
 #   home
 #
-#   generates chart URL from local database
+#   generates chart URL from local database to include
+#  in front page
+# and updates database if flag is set
 # 
 #-------------------------------------------------------------
 def home_view(request, **kwargs):
@@ -59,14 +60,16 @@ def home_view(request, **kwargs):
 
 
 # --------------------------------------------------------------------------------------------------------------
-#     the list view shows a list of records in the database
+#     list
 #
+#  shows a list of records in the local database
 #
 # --------------------------------------------------------------------------------------------------------------
 def list_view(request, **kwargs):
+    # search functionality is not implemented
     search_term = None
 
-    # there should always be a display_num parameter (i.e., number of items to display per page)    
+    # there should always be a display_num argument (i.e., number of items to display per page)    
     try:
         display_num=int(kwargs['display_num'])
         print "display_num", display_num
@@ -135,8 +138,10 @@ def list_view(request, **kwargs):
 
 
 # --------------------------------------------------------------------------------------------------------------
-# the detail view shows details for a single fedreg document based on primary key (pk) number
-# (and comments if enabled in display templates)
+#  detail
+#
+# shows details for a single fedreg document based on primary key (pk) number
+# (and comments if enabled)
 # --------------------------------------------------------------------------------------------------------------
 def detail_view(request, **kwargs):
 
@@ -203,7 +208,7 @@ def detail_view(request, **kwargs):
 
         
 # --------------------------------------------
-#    visualizations view
+#    visualizations
 #---------------------------------------------
 def vis_view(request, **kwargs):         
     trophies = []
@@ -240,7 +245,7 @@ def vis_view(request, **kwargs):
     # generate URL to map state counts using Google Map Chart 
     map_url = generate_trophy_map_chart_url(state_counts, 600, 350)
     popn_pie_chart_url = generate_pie_chart_source_popn(trophies, 600, 200)
-    freq_chart_url=generate_trophy_freq_chart_url(trophies, 600, 150)
+    freq_chart_url=generate_trophy_freq_chart_url(trophies, 600, 200)
             
     return render_to_response('visualizations.html', {"trophies_sorted":trophies_sorted, "state_counts_sorted":state_counts_sorted, "state_counts_total":state_counts_total, 'map_url':map_url, 'popn_pie_chart_url':popn_pie_chart_url, "freq_chart_url": freq_chart_url}, context_instance=RequestContext(request))
 
