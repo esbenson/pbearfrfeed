@@ -53,9 +53,10 @@ def home_view(request, **kwargs):
 
     # generates chart from local database
     qset = FedRegDoc.objects.all()
+    record_count = qset.count()
     chart_url = generate_freq_chart_url_from_qset(qset, 600, 150) # last two parameters give size of chart graphic  
      
-    return render_to_response('home.html', {"chart_url": chart_url, "search_term":search_term}, context_instance=RequestContext(request))
+    return render_to_response('home.html', {"chart_url": chart_url, "search_term":search_term, 'record_count':record_count}, context_instance=RequestContext(request))
 
 
 
