@@ -3,22 +3,41 @@
 {% block script %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
 <script>
-/* function to hide/show source data on click */
+
 $(function() {
-    $("#show_hide").click(function() {
+/* function to hide/show source data on click */
+    $("#show_hide_data").click(function() {
         var display_val = $("#source_data").css("display");
         if (display_val == "none") {
             $("#source_data").css("display","inline");
-            $("#show_hide").text("(-) hide source data");
+            $("#show_hide_data").text("(-) hide source data");
         } else {
             $("#source_data").css("display","none");
-            $("#show_hide").text("(+) show source data");
+            $("#show_hide_data").text("(+) show source data");
         }
     });
-    $("#show_hide").mouseover(function() {
+    $("#show_hide_data").mouseover(function() {
+        $(this).css("cursor","pointer");
+    });
+
+/* to resort the list by state or by count */
+    $("#resort_states_counts").click(function() {
+        var sort_val = $("#resort_states_counts").text();
+        if (sort_val == "Click here to re-sort by count") {
+            $("#resort_states_counts").text("Click here to re-sort by state");
+            $("#sorted_by_state").toggle();
+            $("#sorted_by_count").toggle();
+        } else {        
+            $("#resort_states_counts").text("Click here to re-sort by count");
+            $("#sorted_by_state").toggle();
+            $("#sorted_by_count").toggle();
+        }
+    });
+    $("#resort_states_counts").mouseover(function() {
         $(this).css("cursor","pointer");
     });
 });
+
 </script>
 {% endblock script %}
 
@@ -31,16 +50,21 @@ $(function() {
 {% block content %}
     <div style="margin-left:auto; margin-right:auto; width:600px;text-align:center;">
 
+    <p style="font-size:10pt;">The maps and charts below were generated on {% now "j F Y" %} at  {% now  "g:i a"%} Eastern Standard Time. <span style="font-weight:bold">Note</span>: These figures were calculated from the <a href="#show_hide_data">data</a> given at the bottom of the page, which were automatically extracted from the <em>Federal Register</em> database and are not guaranteed to be complete or correct.</p>
+
     <!-- show map of state counts -->
     {% if map_url %}
         <div style="text-align:left; padding:20px;">
-        <h2>Applications for Polar Bear Trophy Import Permits by State of Applicant</h2>
+        <h2>Applications for Polar Bear Trophy Import Permits by State of Applicant, {{minyear}}-{{maxyear}}</h2>
         <img src="{{ map_url }}"/>
 
         <!-- show state/count details -->
-        <br/><span style="font-weight:bold">Number of Permit Applications per State</span>: {% for s in state_counts_sorted %}
-                <span style="font-style:italic">{{s.0}}</span>: {{s.1}}{% if not forloop.last %},{% endif %}
-            {% endfor %}. <span style="font-style:italic">TOTAL</span>: {{ state_counts_total }}. <span style="font-weight:bold">Note</span>: These figures were calculated from the list given below, which was automatically generated and may include errors and omissions.
+        <br/><span style="font-weight:bold">Number of Permit Applications per State</span>:<span id="sorted_by_state">
+         {% for s in state_counts_dicts|dictsort:"state" %}
+                <span style="font-style:italic">{{s.state}}</span>: {{s.count}}{% if not forloop.last %},{% endif %}{% endfor %}. <span style="font-style:italic">TOTAL</span>: {{ state_counts_total }}.</span>
+        <span id="sorted_by_count" style="display:none">
+         {% for s in state_counts_dicts|dictsortreversed:"count" %}
+                <span style="font-style:italic">{{s.state}}</span>: {{s.count}}{% if not forloop.last %},{% endif %}{% endfor %}. <span style="font-style:italic">TOTAL</span>: {{ state_counts_total }}. </span>(<span id="resort_states_counts" style="font-weight:bold;font-style:italic;">Click here to re-sort by count</span>.) 
         </div>
     {% endif %}
 
@@ -48,14 +72,14 @@ $(function() {
 <!-- show pie chart of source populations -->
 {% if popn_pie_chart_url %}
         <div style="text-align:left; padding:20px;">
-        <h2>Polar Bear Trophy Import Permit Applications by Source Population</h2>
+        <h2>Proportion of Polar Bear Trophy Import Permit Applications from Each Source Population, {{minyear}}-{{maxyear}}</h2>
         <img src="{{ popn_pie_chart_url }}"/>
     </div>
 {% endif %}
 
 {% if freq_chart_url %}
         <div style="text-align:left; padding:20px;">
-        <h2>Polar Bear Trophy Import Permit Applications by Source Population Over Time</h2>
+        <h2>Polar Bear Trophy Import Permit Applications by Source Population Over Time, {{minyear}}-{{maxyear}}</h2>
         <img src="{{ freq_chart_url }}"/>
     </div>
 {% endif %}
@@ -66,7 +90,7 @@ $(function() {
 
 
 <!-- show trophy source data details -->
-<div id="show_hide" style="font-style:italic;font-weight:bold;margin-top:30px;margin-bottom:20px;margin-left:auto; margin-right:auto; width:300px;text-align:center;align:center;">(+) show source data</div>
+<div id="show_hide_data" style="font-style:italic;font-weight:bold;margin-top:30px;margin-bottom:20px;margin-left:auto; margin-right:auto; width:300px;text-align:center;align:center;">(+) show source data</div>
 <div id="source_data" style="margin-left:auto; margin-right:auto; width:900px;text-align:center;font-size:10pt; align:center;display:none;" >
 <h2>Polar Bear Trophy Permit Application Source Data</h2>
     <table style="margin-left:auto; margin-right:auto; width:900px; font-size:8pt; text-align:left">

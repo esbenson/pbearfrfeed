@@ -229,6 +229,8 @@ def polar_bear_search(regex):
 #    helper for trophy view
 #   extracts records for database 
 # and if flag set, uses google to geocode towns
+#
+# returns a list of dicts
 #---------------------------------------------
 def extract_trophy_records_from_local(google_geocode_flag):
 

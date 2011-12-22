@@ -213,13 +213,15 @@ def detail_view(request, **kwargs):
 #---------------------------------------------
 def vis_view(request, **kwargs):         
     trophies = []
-    trophies_sorted=[]
+    trophies_sorted = []
     state_counts = {}
-    state_counts_sorted = []
+    state_counts_dicts = []
     state_counts_total = 0
 
     google_geocode_flag = False # NEED TO SET TO True TO ALLOW GEOCODING    
     trophies = extract_trophy_records_from_local(google_geocode_flag)
+    minyear = trophies[0]['app_date'].year
+    maxyear = minyear
     
     # sum number of permit apps per state
     for t in trophies:
@@ -230,25 +232,26 @@ def vis_view(request, **kwargs):
                         state_counts[v] += 1
                     else:
                         state_counts[v] = 1
-
-    # create sorted lists of (full) state names and counts for better display
     for k,v in state_counts.iteritems():
-        state_counts_sorted.append([full_state_name_from_abbrev(k), v])
+        state_counts_dicts.append({"state":full_state_name_from_abbrev(k), "count":v})
         state_counts_total += int(v)
-    state_counts_sorted.sort(key=itemgetter(0))    
 
     # sort trophy details by date for display and place in list of lists and regularize source population names
     for t in trophies:    
         t['app_popn'] = regularize_population_name(t['app_popn'])                               
         trophies_sorted.append([t['app_date'], t['app_name_prefix'], t['app_name'], t['app_name_suffix'], t['app_city'], t['app_state'], t['app_num'], t['app_popn']]) # if using lat/lng would need to add in here for display
-    trophies_sorted.sort(key=itemgetter(0))         
-    
+        if t['app_date'].year < minyear:
+            minyear = t['app_date'].year
+        if t['app_date'].year > maxyear:
+            maxyear = t['app_date'].year
+    trophies_sorted.sort(key=itemgetter(0))
+        
     # generate URL to map state counts using Google Map Chart 
     map_url = generate_trophy_map_chart_url(state_counts, 600, 350)
     popn_pie_chart_url = generate_pie_chart_source_popn(trophies, 600, 200)
     freq_chart_url=generate_trophy_freq_chart_url(trophies, 600, 200)
             
-    return render_to_response('visualizations.html', {"trophies_sorted":trophies_sorted, "state_counts_sorted":state_counts_sorted, "state_counts_total":state_counts_total, 'map_url':map_url, 'popn_pie_chart_url':popn_pie_chart_url, "freq_chart_url": freq_chart_url}, context_instance=RequestContext(request))
+    return render_to_response('visualizations.html', {"trophies_sorted":trophies_sorted, "state_counts_dicts":state_counts_dicts, "state_counts_total":state_counts_total, 'map_url':map_url, 'popn_pie_chart_url':popn_pie_chart_url, "freq_chart_url": freq_chart_url, "minyear":minyear, "maxyear":maxyear}, context_instance=RequestContext(request))
 
 
 
