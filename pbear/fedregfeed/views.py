@@ -20,7 +20,7 @@ from charts import generate_freq_chart_url_from_fedreg, generate_freq_chart_url_
 # 
 #-------------------------------------------------------------
 def home_view(request, **kwargs):
-    print "in home"
+    #print "in home"
 
     # check for args
     try:
@@ -38,7 +38,7 @@ def home_view(request, **kwargs):
     # update the database if flag is set
     # if database contains docs already, then only search for more recent items than contained in database (ie., add a "gte" condition)
     if update_database_flag:
-        print "updating database"
+        #print "updating database"
         fr_base_url = 'http://api.federalregister.gov/v1/articles.json'
         fr_conditions = 'conditions[term]=' + search_term         
         try:
@@ -47,16 +47,19 @@ def home_view(request, **kwargs):
         except IndexError:
             print "no records found in database in multiple, starting from scratch"
             pass
-        print "fr_conditions, {0}\n\n\n".format(fr_conditions)
+        #print "fr_conditions, {0}\n\n\n".format(fr_conditions)
         request_return = update_database_from_fedreg(fr_base_url, fr_conditions)
-        print request_return
+        #print request_return
 
+    # most recent item    
+    most_recent_doc = FedRegDoc.objects.all().order_by('-publication_date')[0]
+    
     # generates chart from local database
     qset = FedRegDoc.objects.all()
     record_count = qset.count()
     chart_url = generate_freq_chart_url_from_qset(qset, 600, 150) # last two parameters give size of chart graphic  
      
-    return render_to_response('home.html', {"chart_url": chart_url, "search_term":search_term, 'record_count':record_count}, context_instance=RequestContext(request))
+    return render_to_response('home.html', {"chart_url": chart_url, "search_term":search_term, 'record_count':record_count, "most_recent_doc":most_recent_doc}, context_instance=RequestContext(request))
 
 
 
@@ -73,13 +76,13 @@ def list_view(request, **kwargs):
     # there should always be a display_num argument (i.e., number of items to display per page)    
     try:
         display_num=int(kwargs['display_num'])
-        print "display_num", display_num
+        #print "display_num", display_num
     except KeyError:
         print "no display number argument found"
         raise Http404
 
     # get list of  docs matching search term, if there is a search term; otherwise get all
-    print "getting matching list of docs to search term (or all)"
+    #print "getting matching list of docs to search term (or all)"
     if search_term:
         doc_list = FedRegDoc.objects.filter(html_full_text__contains=search_term)
     else:
@@ -87,7 +90,7 @@ def list_view(request, **kwargs):
 
     # either get the requested doc_pk as first item to show ....  
     try:
-        print "trying to get doc_pk object"
+        #print "trying to get doc_pk object"
         doc_pk=int(kwargs['doc_pk'])
         # for search, need to add check here for whether doc_pk is in search result set
         doc_list = doc_list.order_by('-publication_date')
@@ -97,7 +100,7 @@ def list_view(request, **kwargs):
                 break
     # ...  or if no doc_pk given, show the most recent item
     except KeyError:
-        print "no doc_pk, instead retrieving most recent"
+        #print "no doc_pk, instead retrieving most recent"
         # get the pk of the newest item by pub date
         doc_list = doc_list.order_by('-publication_date')
         doc_pk = doc_list[0].pk
@@ -105,8 +108,8 @@ def list_view(request, **kwargs):
     total_doc_count = doc_list.count()        
 
     # set navigation parameters
-    print "total_doc_count", total_doc_count
-    print "setting nav parameters"
+    #print "total_doc_count", total_doc_count
+    #print "setting nav parameters"
     if display_offset == 0:
         newest_pk=None
         newer_pk= None
@@ -163,7 +166,7 @@ def detail_view(request, **kwargs):
     # get doc from database 
     try: 
         if not doc_pk:
-            print "no doc_pk given to single view - showing first by publication date"
+            #print "no doc_pk given to single view - showing first by publication date"
             doc = FedRegDoc.objects.order_by('-publication_date')[0]
         else:
             doc = FedRegDoc.objects.get(pk=doc_pk)

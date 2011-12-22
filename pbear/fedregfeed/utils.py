@@ -80,7 +80,7 @@ def fetch_fedreg_results_page(url):
     # read, close file, and deserialize json data
     jsondata = fedregsource.read()
     fedregsource.close()
-    print "jsondata:" , jsondata
+    #print "jsondata:" , jsondata
     if jsondata:
         try:
             page = json.loads(jsondata)
@@ -118,7 +118,7 @@ def add_object_to_database(d):
         # check to see if agencies are new, and if so, save to database
         for a in d['agencies']:
             # extract info from results and put in temporary Agency object
-            print "a:" , a
+            #print "a:" , a
             agency_to_add = Agency()
             for k,v in a.iteritems():
                 if k=='url':
@@ -136,16 +136,16 @@ def add_object_to_database(d):
 
             # if new agency id isn't given, or if it's given and doesn't match existing database Agency record, then add it to database
             if not agency_to_add.agency_original_id:
-                print "no agency id given, adding to database"
+                #print "no agency id given, adding to database"
                 agency_to_add.save()
             else:
                 try:
                     agency_to_add=Agency.objects.get(agency_original_id=agency_to_add.agency_original_id)
                 except Agency.DoesNotExist:
-                    print "no matching agency in database, adding new" 
+                    #print "no matching agency in database, adding new" 
                     agency_to_add.save() 
                 except Agency.MultipleObjectsReturned:
-                    print "multiple matching agency ids in database, selecting the first"
+                    #print "multiple matching agency ids in database, selecting the first"
                     agency_to_add=Agency.objects.filter(agency_original_id=agency_to_add.agency_original_id)[0]
             obj.agencies.add(agency_to_add)  
                                   
@@ -219,7 +219,7 @@ def polar_bear_search(regex):
     for d in FedRegDoc.objects.all():
         if d.html_fulltext:
             if search_re.search(d.html_full_text): 
-                print "found match in polar_bear_search for doc.pk:", d.pk  
+                #print "found match in polar_bear_search for doc.pk:", d.pk  
                 matching_docs.append(d.pk)
 
     return matching_docs
@@ -363,8 +363,8 @@ def google_geocode(address_string):
         geocode_result_json = f.read()
         f.close()
         geocode_result = json.loads(geocode_result_json)
-        print "geocode_url:", geocode_url
-        print "geocode_result:", geocode_result
+        #print "geocode_url:", geocode_url
+        #print "geocode_result:", geocode_result
         if geocode_result['status'] =='OK':            
             try:
                 geocode_result['lat']= geocode_result['results'][0]['geometry']['location']['lat']

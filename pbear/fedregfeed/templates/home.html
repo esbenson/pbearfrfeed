@@ -32,7 +32,8 @@ Polar Bear Feed
 
     <p>The <strong>Polar Bear Feed</strong> is a dynamically updated database of <em>U.S. Federal Register</em> items (currently {{record_count}} of them) that mention polar bears from 1994 to the present. It also provides dynamically generated visualizations of data, including charts of permit applications for imports of polar bear trophies from Canada between 1997 and 2008.</p>
 
-    <p><strong>What it's good for</strong>: Environmentalists, animal protectionists, trophy hunters, and others can use the feed to easily keep track U.S. federal government actions relating to polar bears, including the drafting of new rules and regulations and the issuance of permits. (Note: The Polar Bear Feed is for informational purposes only; no guarantees of accuracy or completeness are made. For official regulatory texts and the opportunity to submit public comments, see the official <a href="http://ww.federalregister.gov" target="_blank">Federal Register</a> site and <a href="http://www.regulations.gov/" target="_blank">Regulations.gov</a>.)</p>
+    <p><strong>What it's good for</strong>: Environmentalists, animal protectionists, trophy hunters, and others can use the feed to easily keep track U.S. federal government actions relating to polar bears, including the drafting of new rules and regulations and the issuance of permits.</p>    
+    <p>The Polar Bear Feed is for informational purposes only; no guarantees of accuracy or completeness are made. For official regulatory texts and the opportunity to submit public comments, see the <a href="http://ww.federalregister.gov" target="_blank">Federal Register</a> site and <a href="http://www.regulations.gov/" target="_blank">Regulations.gov</a>.</p>
 
     <p><strong>How it works</strong>: The application builds a local database by using the <a href="http://www.federalregister.gov/blog/learn/developers" target="_blank">Federal Register Application Programming Interface (API)</a> to search for the terms "polar bear" or "polar bears" in the full text of notices, rules, and other items in the <em>Federal Register</em>. It makes the results viewable as a browsable list, as an RSS feed, and as a detail view of each item, and it dynamically generates charts and maps based on the local database.</p>
 
@@ -41,12 +42,18 @@ Polar Bear Feed
     <p><strong>To see more</strong>: Click on the links at the top of the page above to access the <a href="{% url pbear_list_default %}">list</a> of polar-bear-related FR items, some <a href="{% url pbear_vis %}">visualizations</a> related to the import of polar bear trophies from Canada, and the <a href="/feed" target="_blank">RSS feed</a>. Or continue reading below the chart for background information about polar bear conservation.</p>
  
     {% if chart_url %}
-    <div style="margin-left:auto; margin-right:auto; width:600px;text-align:center;">
-        <h2>Polar-Bear-Related Items in the <em>Federal Register</em></h2>
+    <br/><div style="margin-left:auto; margin-right:auto; width:600px;text-align:center;">
+        <h2>Polar Bear-Related Items in the <em>Federal Register</em> as of {% now "F j, Y" %}</h2>
         <img src="{{ chart_url }}"/>
     </div>
     {% endif %}
 
+    {% if most_recent_doc %}
+    <div style="margin-left:auto; margin-right:auto; width:600px;text-align:center;">
+        <h2>Most Recent Item</h2><p>{{most_recent_doc.publication_date}}<br/><a href="{% url pbear_detail_pk doc_pk=most_recent_doc.pk %}" style="text-decoration:none">{{most_recent_doc.title}}</a></p>
+    </div><br/>
+    {% endif %}
+    
 
     <p><strong>Some background</strong>: <a href="http://eol.org/pages/328580/overview" target="_blank"><em>Ursus maritimus</em></a>, the polar bear, has been the focus of international conservation efforts since the 1960s and in recent years has come to symbolize the threat of global climate change. In 2008, the <a href="http://www.fws.gov/" target="_blank">U.S. Fish and Wildlife Service</a> took the historic step of listing the polar bear as "threatened" under the <a href="http://www.fws.gov/endangered/laws-policies/" target="_blank">Endangered Species Act of 1973</a> because of the likelihood that global warming would lead to shrinking habitats for the species -- specifically, less ice.</p>
 

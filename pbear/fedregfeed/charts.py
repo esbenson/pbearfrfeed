@@ -28,7 +28,7 @@ def generate_trophy_map_chart_url(state_counts, sizex, sizey):
 
     params = map_type + "&" + map_size + "&" + map_states + "&" + color_values + "&" + color_gradient 
     chart_url = base_url + "?" + quote(params, "&?,=|")   
-    print "chart_url in generate_trophy_map_chart_url", chart_url 
+    #print "chart_url in generate_trophy_map_chart_url", chart_url 
 
     return chart_url
     
@@ -49,11 +49,11 @@ def generate_freq_chart_url_from_fedreg(search_term, start_year, end_year):
         date_conditions = "conditions[publication_date][year]=" + str(y)
         url = base_url_plus_search_term + "&" + date_conditions 
         url = quote(url, safe='/:+=?&"|')
-        print "url", url
+        #print "url", url
         search_result = fetch_fedreg_results_page(url) # request page
         if search_result:  
             count.append(int(search_result['count']))
-            print "count:", search_result['count']
+            #print "count:", search_result['count']
         
     # set up chart to display
     if max(count) < 100:
@@ -62,8 +62,8 @@ def generate_freq_chart_url_from_fedreg(search_term, start_year, end_year):
     else:
         left_axis_step = int(pow(10, int(log10(max(count)))) / 10) 
         max_y = (int(max(count) / left_axis_step) * left_axis_step) + (left_axis_step * 2)
-    print "left", left_axis_step, "max_y", max_y
-    print "max_y", max_y
+    #print "left", left_axis_step, "max_y", max_y
+    #print "max_y", max_y
     left_axis = range(0, max_y + left_axis_step, left_axis_step)
     left_axis[0] = ""
     bottom_axis = year_range
@@ -85,7 +85,7 @@ def generate_freq_chart_url_from_qset(qset, sizex, sizey):
     
     end_year = qset.order_by('-publication_date')[0].publication_date.year
     start_year = qset.order_by('publication_date')[0].publication_date.year
-    print "start {0}, end {1}".format(start_year, end_year)
+    #print "start {0}, end {1}".format(start_year, end_year)
 
     year_range=range(start_year,end_year + 1)
     month_range=range(1, 13)
@@ -107,8 +107,8 @@ def generate_freq_chart_url_from_qset(qset, sizex, sizey):
         count_presdocs.append(year_qset.filter(document_type='Presidential Document').count())
         count_unknown.append(year_qset.filter(document_type='Document of Unknown Type').count())
         count_total.append(count_unknown[-1] + count_presdocs[-1] + count_rules[-1] + count_proprules[-1] + count_notices[-1])
-    for i in [count_rules, count_proprules, count_notices, count_presdocs, count_unknown, count_total]:
-        print i
+    #for i in [count_rules, count_proprules, count_notices, count_presdocs, count_unknown, count_total]:
+        #print i
 
     # set up chart axis parameters
     largest_y = max(count_total)
@@ -158,7 +158,7 @@ def generate_pie_chart_source_popn(trophies, sizex, sizey):
     for k,v in source_popn_counts.iteritems():
         chart_data_labels.append([k, v])
     chart_data_labels.sort(key=itemgetter(1))
-    print "sorted chart_data_labels: ", chart_data_labels    
+    #print "sorted chart_data_labels: ", chart_data_labels    
     for c in chart_data_labels:
         percent=float(c[1])/total_app_count
         chart_labels.append(c[0] + " (" + str(c[1]) + " / " + "{:.2%})".format(percent))
@@ -341,7 +341,7 @@ def generate_bar_chart_by_agency_from_local():
         i += 1
     i=0
     combined = sorted(combined, key=lambda c: c[1], reverse=True)
-    print "combined", combined
+    #print "combined", combined
     counts = []
     agency_names = []
     while i < len_counts:
@@ -357,7 +357,7 @@ def generate_bar_chart_by_agency_from_local():
     chart.add_data(counts)
     chart.set_bar_width(10)
     chart_url = chart.get_url()
-    print "chart_url by agency", chart_url
+    #print "chart_url by agency", chart_url
     
     return chart_url
     
