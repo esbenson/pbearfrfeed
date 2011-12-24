@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block script %}
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script> -->
+<script></script>
+{% endblock script %}
+
+
+{% block title %}
+Polar Bear Feed: Search
+{% endblock title %}
+
+
+{% block content %}
+<div style="margin-left:auto; margin-right:auto; text-align:left;width:600px;">
+{% if form %}
+<form action="/search/" method="post">{% csrf_token %}
+    {{form.as_p}}
+<input type="submit" value="Search" />
+</form>
+{% endif %}
+
+{% if search_term %}
+    {% if total_records == 0 %}
+        <p>no records found</p>
+    {% else %}
+        <p>Search Term: {{search_term}}</p>
+        <p>Total Found: {{total_records}}</p>
+        <P>Page: {{display_page}} of {{total_pages}}</p>
+        <p>{% for p in pages %}
+             {% if p != display_page %}
+                <a href="{% url pbear_search_term_page search_term=search_term display_page=p %}">{{p}}</a>
+            {% else %}
+                {{p}}
+            {% endif %}      
+        {% endfor %}
+        </p>
+        {% for doc in display_qset %}
+                <p><span class="doc_date" >{{doc.publication_date}}</span>
+                     <span class="doc_title" style="font-weight:normal;" ><a href="{% url pbear_detail_pk doc_pk=doc.pk %}" style="text-decoration:none">{{doc.title}}</a></span></p>  
+        {% endfor %}
+    {% endif %}    
+{% endif %}
+</div>
+
+{% endblock content %}
+

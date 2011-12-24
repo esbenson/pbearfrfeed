@@ -13,7 +13,11 @@ urlpatterns = patterns('fedregfeed.views',
     url(r'^detail/(?P<doc_pk>\d+)/$', 'detail_view', name='pbear_detail_pk'), # calls the detail view for single record identified by primary key
     url(r'^visualizations/$', 'vis_view', name='pbear_vis'), # calls the visualizations view
     url(r'^$', 'home_view', {'update_database_flag':True, 'search_term':r'"polar bear"|"polar bears"'}, name='pbear_home'), # calls the home view and updates the database
-)
+    url(r'^search/(?P<search_term>\w+)/(?P<display_page>\d+)/$', 'search_view', {'num_per_page':10}, name='pbear_search_term_page'), # calls the home view and updates the database
+    url(r'^search/(?P<search_term>\w+)/$', 'search_view', {'num_per_page':10}, name='pbear_search_term'), # calls the home view and updates the database
+    url(r'^search/$', 'search_view', {'num_per_page':10, 'display_page': 1}, name='pbear_search_default'), # calls the home view and updates the database
+    url(r'^search/$', 'search_view', {}, name='pbear_search_no_args'), # calls the home view and updates the database    
+    )
 
 #------------------------------------------
 #------------------------------ feed and comments

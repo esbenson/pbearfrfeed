@@ -1,6 +1,7 @@
 from django.shortcuts import render_to_response, get_object_or_404, get_list_or_404
 from django.http import Http404
 from django.template import RequestContext
+from django import forms
 
 from urllib2 import urlopen, quote
 import re, json, datetime
@@ -258,6 +259,86 @@ def vis_view(request, **kwargs):
 
 
 
+# --------------------------------------------
+#     search form
+# --------------------------------------------
+class SearchForm(forms.Form):
+    search_term = forms.CharField(max_length=200)
+
+# --------------------------------------------
+#    search view
+#---------------------------------------------
+def search_view(request, **kwargs):
+    '''search_view for polar bear feed '''
+
+    search_term = None
+    
+    # if result of form submission
+    if request.method == 'POST':
+        print "in post"
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            print "form is valid"
+            search_term = form.cleaned_data['search_term']
+        else:
+            print "form is not valid"
+
+    # if NOT result of form submission
+    else:
+        form = SearchForm()
+                        
+    # load args
+    try:
+        num_per_page=int(kwargs['num_per_age'])
+    except:
+        num_per_page=10
+    try:
+        display_page=int(kwargs['display_page'])
+    except:
+        display_page=0
+    if not search_term:
+        try:
+            search_term = kwargs['search_term'] 
+            # to do: convert search term to proper format
+        except:
+            search_term = None
+   
+    # carry out search
+    nav_links = []
+    print "search term: ", search_term
+    if not search_term:
+        display_qset = None
+        total_records = 0
+        total_pages = 0
+        pages = None
+    else:
+        qset = FedRegDoc.objects.filter(html_full_text__icontains=search_term).order_by('-publication_date')
+        total_records = qset.count()
+        if total_records == 0:
+            display_qset = None
+            total_pages = 0
+            pages = None
+        else:
+            total_pages = total_records/num_per_page
+            #if total_records % num_per_page > 0:
+            #    total_pages += 1
+            pages = range(1, total_pages + 1)
+            display_offset = (display_page * num_per_page) - 1             
+            if display_offset < total_records:
+                if display_offset + num_per_page >= total_records:
+                    display_qset = qset[display_offset:total_records - 1]
+                else:
+                    display_qset = qset[display_offset:display_offset + num_per_page]
+            else:
+                raise Http404
+
+    print "total_found: ", total_records
+
+    #render page
+    return render_to_response('search.html', {'display_qset':display_qset, 'display_page':display_page, 'num_per_page':num_per_page, 'search_term':search_term, 'total_records':total_records, 'total_pages':total_pages, 'pages':pages, 'form':form}, context_instance=RequestContext(request))
+
+
+
 # ------------------------------------------------0
 #    add html_full_text to database
 #     (only if missing from record) 
@@ -265,17 +346,17 @@ def vis_view(request, **kwargs):
 #    this is meant to be a run-once function
 #    to avoid reloading entire database
 # ------------------------------------------------
-def add_html_full_text_to_all(request):
-    for d in FedRegDoc.objects.all():
-        print d.title
-        if not d.html_full_text:
-            try:
-                f=urlopen(d.html_url)
-                d.html_full_text=f.read()
-                f.close()
-                d.save()
-            except URLError:
-                print "URLError when opening ", d.html_url
-                
-    return render_to_response('add_html_full_text.html', {}, context_instance=RequestContext(request))
-
+#def add_html_full_text_to_all(request):
+#    for d in FedRegDoc.objects.all():
+#        print d.title
+#        if not d.html_full_text:
+#            try:
+#                f=urlopen(d.html_url)
+#                d.html_full_text=f.read()
+#                f.close()
+#                d.save()
+#            except URLError:
+#                print "URLError when opening ", d.html_url
+#                
+#    return render_to_response('add_html_full_text.html', {}, context_instance=RequestContext(request))
+    
