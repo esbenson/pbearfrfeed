@@ -4,6 +4,9 @@
 
 
 {% block nav %}
+<div style="text-align:left;font-style:normal;margin:10px;margin-left:auto; margin-right:auto;width:600px">
+<p>Currently only summaries/abstracts of individual items are available here. For more details, click on the &rArr; links to go the official <a href="http://www.federalregister.gov" target="_blank">Federal Register</a> site.</p></div> 
+
 <div style="text-align:center;margin:10px;"><p>
 {% if search_term %}
 {% if search_term != 'None' %}<a href="{% url pbear_search_term_page display_page=display_page search_term=search_term %}" style="font-weight:bold;text-decoration:none">{% else %}<a href="{% url pbear_browse_page display_page=display_page %}" style="font-weight:bold;text-decoration:none">{% endif %}back to list</a></p></div>
@@ -14,8 +17,6 @@
 {% block content %}
 
         <div style="margin-left:auto;margin-right:auto;width:500px;text-align:left;">
-<div style="text-align:center;font-style:italic;margin:10px;">
-<p>Currently only summaries/abstracts are available here; for more details, click on the &rArr; links to go the official <a href="http://www.federalregister.gov" target="_blank">Federal Register</a> site.</p></div> 
     {% if doc %}
         
          <div style="text-align:center;margin-top:20px;"><p class = "doc_data">
