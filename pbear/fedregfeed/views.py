@@ -3,7 +3,7 @@ from django.http import Http404
 from django.template import RequestContext
 from django import forms
 
-from urllib2 import urlopen, quote
+from urllib2 import urlopen, quote, unquote
 import re, json, datetime
 from operator import itemgetter
 
@@ -145,71 +145,38 @@ def list_view(request, **kwargs):
 # --------------------------------------------------------------------------------------------------------------
 #  detail
 #
-# shows details for a single fedreg document based on primary key (pk) number
-# (and comments if enabled)
+# shows details for a single fedreg document 
 # --------------------------------------------------------------------------------------------------------------
 def detail_view(request, **kwargs):
 
     # set defaults
-    comment_posted = False
     doc_pk = None
+    search_term = None
+    display_page = None
+    show_all = True
 
     # get arguments from kwargs
     for k,v in kwargs.iteritems():
-        if k == 'comment':
-            comment_posted = v
-        elif k == 'doc_pk':
+        if k == 'doc_pk':
             doc_pk = int(v)
+        elif k == 'search_term':
+            search_term = v
+        elif k == 'show_all':
+            show_all = v
+        elif k == 'display_page':
+            display_page = int(v)
         else:
-            print "invalid argument - ", k, " - passed to single"
+            print "invalid argument - ", k, " - passed to detail view"
             raise Http404
 
-    # get doc from database 
-    try: 
-        if not doc_pk:
-            #print "no doc_pk given to single view - showing first by publication date"
-            doc = FedRegDoc.objects.order_by('-publication_date')[0]
-        else:
-            doc = FedRegDoc.objects.get(pk=doc_pk)
-    except FedRegDoc.DoesNotExist:
+    # get doc from database
+    try:
+        doc = FedRegDoc.objects.get(pk=doc_pk)
+    except:
         raise Http404
-
-    # find primary key for nav to newer/newest record
-    newest_pk = FedRegDoc.objects.order_by('-publication_date')[0].pk
-    if newest_pk == doc.pk:
-        newest_pk = None
-        newer_pk = None
-    else:
-        q = list(FedRegDoc.objects.order_by('publication_date').filter(publication_date__gte = doc.publication_date).distinct())
-        i = 0
-        for i in range(len(q)):
-            if q[i].pk == doc.pk:
-                break
-        try:
-            newer_pk = q[i+1].pk
-        except IndexError:
-            newer_pk = None
-            newest_pk = None
-
-    # find primary key for nav to older/oldest record
-    oldest_pk = FedRegDoc.objects.order_by('publication_date')[0].pk
-    if oldest_pk == doc.pk:
-        oldest_pk = None
-        older_pk = None
-    else:
-        q = list(FedRegDoc.objects.order_by('-publication_date').filter(publication_date__lte=doc.publication_date).distinct())
-        i = 0
-        for i in range(len(q)):
-            if q[i].pk == doc.pk:
-                break
-        try:
-            older_pk = q[i+1].pk
-        except IndexError:
-            older_pk = None
-            oldest_pk = None
-        
+      
     # render page
-    return render_to_response('detail.html', {"doc":doc, "comment_posted":comment_posted, "newer_pk":newer_pk, "older_pk":older_pk, "newest_pk":newest_pk, "oldest_pk":oldest_pk}, context_instance=RequestContext(request))
+    return render_to_response('detail.html', {"doc":doc, 'show_all':show_all, 'search_term':search_term, 'display_page':display_page}, context_instance=RequestContext(request))
 
         
 # --------------------------------------------
@@ -257,85 +224,113 @@ def vis_view(request, **kwargs):
             
     return render_to_response('visualizations.html', {"trophies_sorted":trophies_sorted, "state_counts_dicts":state_counts_dicts, "state_counts_total":state_counts_total, 'map_url':map_url, 'popn_pie_chart_url':popn_pie_chart_url, "freq_chart_url": freq_chart_url, "minyear":minyear, "maxyear":maxyear}, context_instance=RequestContext(request))
 
-
-
-# --------------------------------------------
+# -------------------------------------------------
 #     search form
-# --------------------------------------------
+# -------------------------------------------------
 class SearchForm(forms.Form):
     search_term = forms.CharField(max_length=200)
 
-# --------------------------------------------
+# -------------------------------------------------
 #    search view
-#---------------------------------------------
+#--------------------------------------------------
 def search_view(request, **kwargs):
     '''search_view for polar bear feed '''
 
+    default_num_per_page=10
+    default_display_page=1
     search_term = None
-    
-    # if result of form submission
+    quoted_search_term=None
+    display_qset = None
+    display_offset = None
+    pages = None
+    total_pages = 0
+    total_records = 0
+    page_range = []
+    show_all = False
+
+    # if result of search form submission, process form parameter
     if request.method == 'POST':
         print "in post"
         form = SearchForm(request.POST)
         if form.is_valid():
             print "form is valid"
-            search_term = form.cleaned_data['search_term']
+            search_term = unquote(form.cleaned_data['search_term'])
+            display_page = default_display_page
+            num_per_page = default_num_per_page
+            show_all = False
         else:
             print "form is not valid"
 
-    # if NOT result of form submission
+    # if NOT result of form submission, get args & set up form for display
     else:
         form = SearchForm()
-                        
-    # load args
-    try:
-        num_per_page=int(kwargs['num_per_age'])
-    except:
-        num_per_page=10
-    try:
-        display_page=int(kwargs['display_page'])
-    except:
-        display_page=0
-    if not search_term:
         try:
-            search_term = kwargs['search_term'] 
-            # to do: convert search term to proper format
+            num_per_page=int(kwargs['num_per_page'])
         except:
+            num_per_page=default_num_per_page
+        try:
+            display_page=int(kwargs['display_page'])
+            if display_page < 1:
+                raise Http404
+        except:
+            display_page=default_display_page
+        try:
+            show_all = kwargs['show_all']
+        except:
+            show_all = False
+        if not search_term:
+            try:
+                search_term = kwargs['search_term']
+            except:
+                search_term = None
+    if search_term:
+        search_term = search_term.strip()
+        if search_term == 'None':
             search_term = None
-   
-    # carry out search
-    nav_links = []
-    print "search term: ", search_term
-    if not search_term:
-        display_qset = None
-        total_records = 0
-        total_pages = 0
-        pages = None
-    else:
-        qset = FedRegDoc.objects.filter(html_full_text__icontains=search_term).order_by('-publication_date')
-        total_records = qset.count()
-        if total_records == 0:
-            display_qset = None
-            total_pages = 0
-            pages = None
+            show_all = True
         else:
-            total_pages = total_records/num_per_page
-            #if total_records % num_per_page > 0:
-            #    total_pages += 1
-            pages = range(1, total_pages + 1)
-            display_offset = (display_page * num_per_page) - 1             
+            quoted_search_term = quote(search_term)
+            print "search term: ", search_term
+            print "quoted search term: ", quoted_search_term
+   
+    # either show all or carry out search
+    print "show all = {0}".format(show_all)
+    if show_all:
+        form = None
+        qset = FedRegDoc.objects.all().order_by('-publication_date')
+        print qset.count()
+    else:
+        if search_term:
+            print "searching for ", search_term
+            qset = FedRegDoc.objects.filter(html_full_text__icontains=search_term).order_by('-publication_date')
+        else:
+            qset=None
+    if qset:
+        print "calculating pages"
+        total_records = qset.count()
+        if total_records != 0:
+            total_pages = total_records / num_per_page
+            if total_records % num_per_page > 0:
+                total_pages += 1
+            page_range = range(1, total_pages + 1)
+            display_offset = (display_page - 1) * num_per_page 
             if display_offset < total_records:
+                print display_offset, num_per_page, total_records
                 if display_offset + num_per_page >= total_records:
-                    display_qset = qset[display_offset:total_records - 1]
+                    display_qset = qset[display_offset:total_records]
+                    #print "a display_qset.count()={0}".format(display_qset.count())
                 else:
                     display_qset = qset[display_offset:display_offset + num_per_page]
+                    #print "b display_qset.count()={0}".format(display_qset.count())
             else:
+                print "error: display_offset >= total_records in search"
                 raise Http404
+    else:
+        print "qset empty in search"
 
-    print "total_found: ", total_records
+    print "display_page {0}".format(display_page)
 
-    #render page
-    return render_to_response('search.html', {'display_qset':display_qset, 'display_page':display_page, 'num_per_page':num_per_page, 'search_term':search_term, 'total_records':total_records, 'total_pages':total_pages, 'pages':pages, 'form':form}, context_instance=RequestContext(request))
+    return render_to_response('search.html', {'display_qset':display_qset, 'display_page':display_page, 'num_per_page':num_per_page, 'search_term':search_term, 'quoted_search_term':quoted_search_term, 'total_records':total_records, 'total_pages':total_pages, 'page_range':page_range, 'form':form, 'display_offset':display_offset}, context_instance=RequestContext(request))
 
 
 

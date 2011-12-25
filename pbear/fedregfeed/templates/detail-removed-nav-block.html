@@ -1,0 +1,27 @@
+<div style="padding:10px;padding-top:20px;text-align:center;width:50%;margin-left:auto;margin-right:auto">
+            {% if newest_pk %} 
+                <a href="{% url pbear_detail_pk doc_pk=newest_pk %}">&larr;&larr;newest</a>
+            {% else %}
+                &larr;&larr;newest
+            {% endif %}
+            {% if newer_pk %} 
+                <a href="{% url pbear_detail_pk doc_pk=newer_pk %}">&larr;newer</a>
+            {% else %}
+                &larr;newer
+            {% endif %}
+
+            <a href="{% url pbear_list doc_pk=doc.pk %}" style="font-weight:bold">( back to browse list )</a>
+
+
+            {% if older_pk %} 
+                <a href="{% url pbear_detail_pk doc_pk=older_pk %}">older&rarr;</a>
+            {% else %}
+                older&rarr;
+            {% endif %}
+            {% if oldest_pk %} 
+                <a href="{% url pbear_detail_pk doc_pk=oldest_pk %}">oldest&rarr;&rarr;</a>
+            {% else %}
+                oldest&rarr;&rarr;
+            {% endif %}
+</div>
+

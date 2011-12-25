@@ -10,13 +10,16 @@ display_num=10
 urlpatterns = patterns('fedregfeed.views',
     url(r'^list/(?P<doc_pk>\d+)/$', 'list_view', {'display_num':display_num}, name='pbear_list'), # calls the update/display view with custom arguments - initial record and num to display
     url(r'^list/$', 'list_view', {'display_num':display_num, 'update_database_flag':True}, name='pbear_list_default'), # calls the update/display view with default args
-    url(r'^detail/(?P<doc_pk>\d+)/$', 'detail_view', name='pbear_detail_pk'), # calls the detail view for single record identified by primary key
-    url(r'^visualizations/$', 'vis_view', name='pbear_vis'), # calls the visualizations view
-    url(r'^$', 'home_view', {'update_database_flag':True, 'search_term':r'"polar bear"|"polar bears"'}, name='pbear_home'), # calls the home view and updates the database
-    url(r'^search/(?P<search_term>\w+)/(?P<display_page>\d+)/$', 'search_view', {'num_per_page':10}, name='pbear_search_term_page'), # calls the home view and updates the database
-    url(r'^search/(?P<search_term>\w+)/$', 'search_view', {'num_per_page':10}, name='pbear_search_term'), # calls the home view and updates the database
-    url(r'^search/$', 'search_view', {'num_per_page':10, 'display_page': 1}, name='pbear_search_default'), # calls the home view and updates the database
-    url(r'^search/$', 'search_view', {}, name='pbear_search_no_args'), # calls the home view and updates the database    
+    url(r'^detail/(?P<doc_pk>\d+)/$', 'detail_view', name='pbear_detail_pk'),  #detail
+    url(r'^detail/(?P<doc_pk>\d+)/(?P<search_term>.+)/(?P<display_page>\d+)/$', 'detail_view', name='pbear_detail_pk_search'), #detail
+    url(r'^visualizations/$', 'vis_view', name='pbear_vis'), # visualizations
+    url(r'^$', 'home_view', {'update_database_flag':True, 'search_term':r'"polar bear"|"polar bears"'}, name='pbear_home'), # home
+    url(r'^search/(?P<search_term>.+)/(?P<display_page>\d+)/$', 'search_view', {'num_per_page':10}, name='pbear_search_term_page'), 
+    url(r'^search/(?P<search_term>.+)/$', 'search_view', {'num_per_page':10}, name='pbear_search_term'), 
+    url(r'^search/$', 'search_view', {'num_per_page':10, 'display_page': 1}, name='pbear_search_default'),
+    url(r'^search/$', 'search_view', {}, name='pbear_search_no_args'), 
+    url(r'^browse/(?P<display_page>\d+)/$', 'search_view', {'show_all':True}, name='pbear_browse_page'),
+    url(r'^browse/$', 'search_view', {'show_all':True}, name='pbear_browse'),
     )
 
 #------------------------------------------

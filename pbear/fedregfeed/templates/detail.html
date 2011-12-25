@@ -1,78 +1,57 @@
 {% extends "base.html" %}
  
-{% block title %}Polar Bear Feed: Detail View{% endblock title %}
+{% block title %}Polar Bear Feed{% endblock title %}
+
 
 {% block nav %}
-<div style="padding:10px;padding-top:20px;text-align:center;width:50%;margin-left:auto;margin-right:auto">
-            {% if newest_pk %} 
-                <a href="{% url pbear_detail_pk doc_pk=newest_pk %}">&larr;&larr;newest</a>
-            {% else %}
-                &larr;&larr;newest
-            {% endif %}
-            {% if newer_pk %} 
-                <a href="{% url pbear_detail_pk doc_pk=newer_pk %}">&larr;newer</a>
-            {% else %}
-                &larr;newer
-            {% endif %}
-
-            <a href="{% url pbear_list doc_pk=doc.pk %}" style="font-weight:bold">( back to browse list )</a>
-
-
-            {% if older_pk %} 
-                <a href="{% url pbear_detail_pk doc_pk=older_pk %}">older&rarr;</a>
-            {% else %}
-                older&rarr;
-            {% endif %}
-            {% if oldest_pk %} 
-                <a href="{% url pbear_detail_pk doc_pk=oldest_pk %}">oldest&rarr;&rarr;</a>
-            {% else %}
-                oldest&rarr;&rarr;
-            {% endif %}
-</div>
+<div style="text-align:center;margin:10px;"><p>
+{% if search_term %}
+{% if search_term != 'None' %}<a href="{% url pbear_search_term_page display_page=display_page search_term=search_term %}" style="font-weight:bold;text-decoration:none">{% else %}<a href="{% url pbear_browse_page display_page=display_page %}" style="font-weight:bold;text-decoration:none">{% endif %}back to list</a></p></div>
+{% endif %}
 {% endblock nav %}
 
+ 
 {% block content %}
-            <div style="margin-left:auto;margin-right:auto;width:500px;text-align:left;">
-        {% if doc %}
-            {% if comment_posted %}
-                <div style="margin-left:auto;margin-right:auto;width:200px;"><p class="comment_posted" style="font-weight:bold; color:#0000cc"><em>Thank you for your comment!</em></p></div>
-            {% endif %}
-            
-            <!-- add logic to following to allow for description info -->
-             <p class = "doc_data">
-                 <span class="doc_title" style="font-size:14px;font-weight:bold;" >{{doc.title}}</span> <br/> 
-                 <span class="doc_date">{{doc.publication_date}}</span> &bull;
-                 <span class="doc_type">{{doc.document_type}}</span> &bull;  
-                 <span class="doc_agency">
-                 {% for a in doc.agencies.all %}
-                    {% if a.name %}
-                        {{a.name}}
-                        {% if a.url %}<a href="{{a.url}}" target="_blank" style="text-decoration:none">&rArr;</a>
-                        {% else %}
-                       {% endif %}
-                     {% else %}
-                       {{a.raw_name}}
-                       {% if a.url %}
-                            <a href="{{a.url}}" target="_blank" style="text-decoration:none">&rArr;</a>
-                       {% endif %}
-                     {% endif %}
-                    {% endfor %}
-                  </span>
-                &bull; <span class="doc_fulltext"> Full text:{% if doc.html_url %}
-                     HTML<a href="{{doc.html_url}}" target="_blank" style="text-decoration:none">&rArr;</a>
-                    {% endif %}
-                    {% if doc.pdf_url %}
-                         PDF<a href="{{doc.pdf_url}}" target="_blank" style="text-decoration:none">&rArr;</a>
-                    {% endif %}
 
-                    </span>
-                </p>
-               
-                <P class="doc_abstract"><span style="font-weight:bold">Summary</span>: {{ doc.abstract }}</p>
-        {% else %}
-            <p>no doc defined</p>
-        {% endif %}
-            </div>
+        <div style="margin-left:auto;margin-right:auto;width:500px;text-align:left;">
+<div style="text-align:center;font-style:italic;margin:10px;">
+<p>Currently only summaries/abstracts are available here; for more details, click on the &rArr; links to go the official <a href="http://www.federalregister.gov" target="_blank">Federal Register</a> site.</p></div> 
+    {% if doc %}
+        
+         <div style="text-align:center;margin-top:20px;"><p class = "doc_data">
+                <span class="doc_date">{{doc.publication_date}}</span><br/>
+             <span class="doc_title" style="font-size:14px;font-weight:bold;" >{{doc.title}}</span> <br/> 
+             <span class="doc_type">{{doc.document_type}}</span> &bull;  
+             <span class="doc_agency">
+             {% for a in doc.agencies.all %}
+                {% if a.name %}
+                    {{a.name}}
+                    {% if a.url %}<a href="{{a.url}}" target="_blank" style="text-decoration:none">&rArr;</a>
+                    {% else %}
+                   {% endif %}
+                 {% else %}
+                   {{a.raw_name}}
+                   {% if a.url %}
+                        <a href="{{a.url}}" target="_blank" style="text-decoration:none">&rArr;</a>
+                   {% endif %}
+                 {% endif %}
+                {% endfor %}
+              </span>
+            &bull; <span class="doc_fulltext"> Full text:{% if doc.html_url %}
+                 HTML<a href="{{doc.html_url}}" target="_blank" style="text-decoration:none">&rArr;</a>
+                {% endif %}
+                {% if doc.pdf_url %}
+                     PDF<a href="{{doc.pdf_url}}" target="_blank" style="text-decoration:none">&rArr;</a>
+                {% endif %}
+
+                </span>
+            </p></div>
+           
+            <P class="doc_abstract"><span style="font-weight:bold">Summary</span>: {{ doc.abstract }}</p>
+    {% else %}
+        <p>no doc defined</p>
+    {% endif %}
+        </div>
 
 {% endblock content %}
 
