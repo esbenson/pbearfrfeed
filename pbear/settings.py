@@ -67,10 +67,11 @@ STATIC_URL = 'http://polarbearfeed.etiennebenson.com/static/'
 # URL prefix for admin static files -- CSS, JavaScript and images.
 # Make sure to use a trailing slash.
 # Examples: "http://foo.com/static/admin/", "/static/admin/".
-ADMIN_MEDIA_PREFIX = '../lib/python2.7/site-packages/django/contrib/static/admin/media/'
+ADMIN_MEDIA_PREFIX = '/admin/media/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
+    '/app/lib/python2.7/site-packages/django/contrib'
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
