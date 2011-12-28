@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% load markup %}
+
     <div style="margin:10px;text-align:center;width:500px;margin-right:auto;margin-left:auto;">
         <h2 style="margin-bottom:0px;">{{post.title}}</h2>
         <em>posted by {% if post.author.url %}<a href="{{post.author.url}}" target="_blank">{% endif %}{{post.author.name}}{% if post.author.url %}</a>{% endif %} ({{post.author.email}}) at {{post.datetime}}</em>
