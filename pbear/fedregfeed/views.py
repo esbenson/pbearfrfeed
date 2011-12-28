@@ -7,7 +7,7 @@ from urllib2 import urlopen, quote, unquote
 import re, json, datetime
 from operator import itemgetter
 
-from fedregfeed.models import FedRegDoc
+from fedregfeed.models import FedRegDoc, BlogPost
 from utils import update_database_from_fedreg, full_state_name_from_abbrev, abbrev_state_name_from_full, regularize_population_name, extract_trophy_records_from_local, google_geocode
 from charts import generate_freq_chart_url_from_fedreg, generate_freq_chart_url_from_qset, generate_bar_chart_by_agency_from_local, generate_trophy_map_chart_url, generate_pie_chart_source_popn, generate_trophy_freq_chart_url
 
@@ -334,7 +334,54 @@ def search_view(request, **kwargs):
 
 
 
-# ------------------------------------------------0
+# ------------------------------------------------
+#    blog list view
+# ------------------------------------------------
+def blog_list_view(request, **kwargs):
+    ''' '''
+    
+    try:
+        display_page = int(kwargs['display_page'])
+    except:
+        display_page = 1
+    try:
+        num_per_page = int(kwargs['num_per_page'])
+    except:
+        num_per_page = 10       
+
+    posts = BlogPost.objects.all().order_by('-datetime')
+    total_posts = posts.count()
+    display_offset = (display_page - 1) * num_per_page
+    if (display_offset + num_per_page) > total_posts:
+        posts_to_display = posts[display_offset:total_posts] 
+        more_flag = False
+    else:
+        posts_to_display = posts[display_offset:display_offset + num_per_page]
+        if (display_offset + num_per_page) < total_posts:
+            more_flag = True
+        else:
+            more_flag = False
+
+    return render_to_response('blog_list.html', {'posts_to_display':posts_to_display, 'total_posts':total_posts, 'display_page':display_page, 'num_per_page':num_per_page, 'more_flag':more_flag}, context_instance=RequestContext(request))
+
+
+# ------------------------------------------------
+# blog single-post view
+# ------------------------------------------------
+def blog_single_view(request, **kwargs):
+
+    try:
+        post_pk = int(kwargs['post_pk'])
+    except:
+        print 'no post_pk given'
+        raise Http404
+
+    post = BlogPost.objects.get(pk=post_pk)
+
+    return render_to_response('blog_single.html', {'post':post}, context_instance=RequestContext(request))
+
+
+# ------------------------------------------------
 #    add html_full_text to database
 #     (only if missing from record) 
 #

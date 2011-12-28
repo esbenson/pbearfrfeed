@@ -1,11 +1,11 @@
 from django.conf.urls.defaults import patterns, include, url
-from utils import LatestPolarBearUpdate
+from utils import FRFeed, BlogFeed
 
 #------------------- number to display on list page 
 display_num=10
 
 #------------------------------------------
-#---------------------------- basic views
+#      basic views
 #------------------------------------------
 urlpatterns = patterns('fedregfeed.views',
     url(r'^list/(?P<doc_pk>\d+)/$', 'list_view', {'display_num':display_num}, name='pbear_list'), # calls the update/display view with custom arguments - initial record and num to display
@@ -20,13 +20,17 @@ urlpatterns = patterns('fedregfeed.views',
     url(r'^search/$', 'search_view', {}, name='pbear_search_no_args'), 
     url(r'^browse/(?P<display_page>\d+)/$', 'search_view', {'show_all':True}, name='pbear_browse_page'),
     url(r'^browse/$', 'search_view', {'show_all':True}, name='pbear_browse'),
+    url(r'^blog/(?P<display_page>\d+)/$', 'blog_list_view', {}, name='blog_list_view_page'),
+    url(r'^blog/$', 'blog_list_view', {}),
+    url(r'^blog/detail/(?P<post_pk>\d+)/$', 'blog_single_view', {}, name='blog_single_view'),
     )
 
 #------------------------------------------
-#------------------------------ feed and comments
+#------------------------------ feeds and comments
 #------------------------------------------
 urlpatterns += patterns('fedregfeed',
-    (r'^feed/$', LatestPolarBearUpdate()), # syndication    
+    (r'^feed/$', FRFeed()), # syndication    
+    (r'^blog/feed/$', BlogFeed()), # syndication    
     (r'^comments/', include('django.contrib.comments.urls')), # comments
 )
 

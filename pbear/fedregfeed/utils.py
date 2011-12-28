@@ -1,5 +1,5 @@
 from django.contrib.syndication.views import Feed
-from fedregfeed.models import FedRegDoc, Agency
+from fedregfeed.models import FedRegDoc, Agency, BlogPost, BlogAuthor
 
 from urllib2 import urlopen, quote
 import json
@@ -37,9 +37,9 @@ def regularize_population_name(popn):
     return popn
         
 # -----------------------------------------------------------      
-#      for the RSS feed
+#      for the RSS feed of FR items
 # -----------------------------------------------------------      
-class LatestPolarBearUpdate(Feed):
+class FRFeed(Feed):
     title="Polar Bear Feed"
     link="/feed/"
     description="Latest notices, rules, and proposed rules from the U.S. Federal Register featuring polar bears." 
@@ -62,6 +62,32 @@ class LatestPolarBearUpdate(Feed):
     def item_categories(self, item):
         return item.document_type
         
+# -----------------------------------------------------------      
+#      for the RSS feed of blog posts
+# -----------------------------------------------------------      
+class BlogFeed(Feed):
+    title="Polar Bear Feed Blog"
+    link="/blog/feed/"
+    description="Commentary on U.S. regulatory action on polar bears." 
+    
+    def items(self):
+        return BlogPost.objects.order_by('-datetime')[:5]
+
+    def item_title(self, item):
+        return item.title
+
+    def item_description(self, item):
+        return item.slug
+        
+    def item_link(self, item):
+        return "/blog/{0}/".format(item.pk)
+        
+    def item_pubdate(self, item):
+        return item.datetime
+        
+    #def item_categories(self, item):
+     #   return None
+
   
 # -----------------------------------------------------------      
 #      gets a page of results from the federal register api

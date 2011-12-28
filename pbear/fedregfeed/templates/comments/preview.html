@@ -1,4 +1,4 @@
-{% extends "comments/base.html" %}
+{% extends "base.html" %}
 {% load i18n %}
 
 {% block title %}{% trans "Preview your comment" %}{% endblock %}
@@ -8,14 +8,15 @@
   <form action="{% comment_form_target %}" method="post">{% csrf_token %}
     {% if next %}<div><input type="hidden" name="next" value="{{ next }}" /></div>{% endif %}
     {% if form.errors %}
-    <h1>{% blocktrans count form.errors|length as counter %}Please correct the error below{% plural %}Please correct the errors below{% endblocktrans %}</h1>
+    <h2>{% blocktrans count form.errors|length as counter %}Please correct the error below{% plural %}Please correct the errors below{% endblocktrans %}</h2>
     {% else %}
-    <h1>{% trans "Preview your comment" %}</h1>
+    <h2>{% trans "Preview your comment" %}</h2>
       <blockquote>{{ comment|linebreaks }}</blockquote>
       <p>
       {% trans "and" %} <input type="submit" name="submit" class="submit-post" value="{% trans "Post your comment" %}" id="submit" /> {% trans "or make changes" %}:
       </p>
     {% endif %}
+    <div style="text-align:left;margin-left:auto;margin-right:auto;width:500px;">
     {% for field in form %}
           {% if field.is_hidden %}
             <div>{{ field }}</div>
@@ -23,9 +24,7 @@
             {% if field.errors %}{{ field.errors }}{% endif %}
             <p
               {% if field.errors %} class="error"{% endif %}
-              {% ifequal field.name "honeypot" %} style="display:none;"{% endifequal %}
-              {% ifequal field.name "email" %} style="display:none;"{% endifequal %}
-              {% ifequal field.name "url" %} style="display:none;"{% endifequal %}>
+              {% ifequal field.name "honeypot" %} style="display:none;">{% endifequal %}
               {{ field.label_tag }} {{ field }}
             </p>
           {% endif %}
@@ -35,4 +34,5 @@
     <input type="submit" name="preview" class="submit-preview" value="{% trans "Preview" %}" />
     </p>
   </form>
-{% endblock %}
+  </div>
+{% endblock content %}
