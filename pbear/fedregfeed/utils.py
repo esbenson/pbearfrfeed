@@ -302,8 +302,12 @@ def extract_trophy_records_from_local(google_geocode_flag):
                         app_state = abbrev_state_name_from_full(t.group('app_state')) # full name --> two-letter abbrevs or "None" if not recognized as valid US state name
                         app_num = t.group('app_num')
                         if app_num:
-                            if app_num.strip() == '':
+                            app_num = app_num.strip()
+                            if app_num == '':
                                 app_num = None
+                            else:
+                                if app_num[0:4] != "PRT-":
+                                    app_num = "PRT-{0}".format(t.group('app_num'))
                         trophy_dict = {"app_date":app_date, "app_name":app_name, "app_name_suffix":app_name_suffix, "app_name_prefix":app_name_prefix, "app_city":app_city, "app_state":app_state, "app_num":app_num, "app_popn":app_popn, 'lat':None, 'lng':None}
                         #print trophy_dict                        
                         trophies.append(trophy_dict)       
@@ -328,8 +332,12 @@ def extract_trophy_records_from_local(google_geocode_flag):
                     app_state = abbrev_state_name_from_full(t.group('app_state')) # full name --> two-letter abbrevs or "None" if not recognized as valid US state name
                     app_num = t.group('app_num')
                     if app_num:
-                        if app_num.strip() == '':
+                        app_num = app_num.strip()
+                        if app_num == '':
                             app_num = None
+                        else:
+                            if app_num[0:4] != "PRT-":
+                                app_num = "PRT-{0}".format(t.group('app_num'))
                     trophy_dict = {"app_date":app_date, "app_name":app_name, "app_name_suffix":app_name_suffix, "app_name_prefix":app_name_prefix, "app_city":app_city, "app_state":app_state, "app_num":app_num, "app_popn":app_popn, 'lat':None, 'lng':None}
                     #print trophy_dict
                     trophies.append(trophy_dict)       
@@ -352,10 +360,13 @@ def extract_trophy_records_from_local(google_geocode_flag):
                 app_num = t.group('app_num_pre')
             else:
                 app_num = t.group('app_num')
-            if app_num:
-                if app_num.strip() == '':
-                    app_num = None
-
+                if app_num:
+                    app_num = app_num.strip()
+                    if app_num == '':
+                        app_num = None
+                    else:
+                        if app_num[0:4] != "PRT-":
+                            app_num = "PRT-{0}".format(t.group('app_num'))
             trophy_dict = {"app_date":app_date, "app_name":app_name, "app_name_suffix":app_name_suffix, "app_name_prefix":app_name_prefix, "app_city":app_city, "app_state":app_state, "app_num":app_num, "app_popn":app_popn, 'lat':None, 'lng':None}
 
             # geocode lat/long from city/state: the following works (as long as not over google api limit)
