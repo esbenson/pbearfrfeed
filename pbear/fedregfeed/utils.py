@@ -355,11 +355,11 @@ def extract_trophy_records_from_local(google_geocode_flag):
             app_popn=t.group('app_popn')     
             # following line converts written-out name to two-letter abbrevs or "None" if not recognized as valid US state name
             app_state = abbrev_state_name_from_full(t.group('app_state')) 
-            # following section makes sure permit number isn't just whitespace
+            # following section formats permit number
             if t.group('app_num_pre'):
                 app_num = t.group('app_num_pre')
             else:
-                app_num = t.group('app_num')
+                app_num = group.t('app_num')
                 if app_num:
                     app_num = app_num.strip()
                     if app_num == '':
