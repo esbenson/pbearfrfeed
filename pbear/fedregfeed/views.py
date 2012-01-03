@@ -5,7 +5,8 @@ from django.template import RequestContext
 
 from urllib2 import urlopen, quote, unquote
 from operator import itemgetter
-import re, json, datetime, pylibmc, os
+import re, json, datetime
+#import pylibmc, os
 
 from fedregfeed.models import FedRegDoc, BlogPost
 from utils import update_database_from_fedreg, full_state_name_from_abbrev, abbrev_state_name_from_full, regularize_population_name, extract_trophy_records_from_local, google_geocode
