@@ -2,7 +2,7 @@
 
 # Django settings for pbear project.
 
-DEBUG = False
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
@@ -110,7 +110,7 @@ MIDDLEWARE_CLASSES = (
 #   'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
 #    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
+#    'django.contrib.messages.middleware.MessageMiddleware',
 #    'django.middleware.cache.FetchFromCacheMiddleware',
 )
 
