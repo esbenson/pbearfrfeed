@@ -17,18 +17,22 @@
       </p>
     {% endif %}
     <div style="text-align:left;margin-left:auto;margin-right:auto;width:500px;">
+    <table>
     {% for field in form %}
           {% if field.is_hidden %}
             <div>{{ field }}</div>
           {% else %}
-            {% if field.errors %}{{ field.errors }}{% endif %}
-            <p
+            <tr><td>{% if field.errors %}{{ field.errors }}{% endif %}</td></tr>
+            <tr><td><p
               {% if field.errors %} class="error"{% endif %}
               {% ifequal field.name "honeypot" %} style="display:none;">{% endifequal %}
-              {{ field.label_tag }} {{ field }}
-            </p>
+              {{ field.label_tag }} {% ifequal field.name "url" %}(optional){% endifequal %}</p></td>
+              <td><p {% if field.errors %} class="error"{% endif %}
+        {% ifequal field.name "honeypot" %} style="display:none;"{% endifequal %}>{{ field }}</p></td>
+            </tr>
           {% endif %}
     {% endfor %}
+    </table>
     <p class="submit">
     <input type="submit" name="submit" class="submit-post" value="{% trans "Post" %}" />
     <input type="submit" name="preview" class="submit-preview" value="{% trans "Preview" %}" />

@@ -7,11 +7,11 @@
     {% if field.is_hidden %}
       <div>{{ field }}</div>
     {% else %}
-      <tr style="margin:0px;padding:0px"><td>{% if field.errors %}{{ field.errors }}{% endif %}<td></tr>
+      <tr><td>{% if field.errors %}{{ field.errors }}{% endif %}<td></tr>
       <tr>
         <td><p
         {% if field.errors %} class="error"{% endif %}
-        {% ifequal field.name "honeypot" %} style="display:none;"{% endifequal %}>{{ field.label_tag }}</p></td>
+        {% ifequal field.name "honeypot" %} style="display:none;"{% endifequal %}>{{ field.label_tag }} {% ifequal field.name "url" %}(optional){% endifequal %} </p></td>
         <td><p
         {% if field.errors %} class="error"{% endif %}
         {% ifequal field.name "honeypot" %} style="display:none;"{% endifequal %}>{{ field }}</p></td>
