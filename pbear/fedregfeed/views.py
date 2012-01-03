@@ -1,16 +1,15 @@
+from django import forms
 from django.shortcuts import render_to_response, get_object_or_404, get_list_or_404
 from django.http import Http404
 from django.template import RequestContext
-from django import forms
 
 from urllib2 import urlopen, quote, unquote
-import re, json, datetime
 from operator import itemgetter
+import re, json, datetime, pylibmc, os
 
 from fedregfeed.models import FedRegDoc, BlogPost
 from utils import update_database_from_fedreg, full_state_name_from_abbrev, abbrev_state_name_from_full, regularize_population_name, extract_trophy_records_from_local, google_geocode
 from charts import generate_freq_chart_url_from_fedreg, generate_freq_chart_url_from_qset, generate_bar_chart_by_agency_from_local, generate_trophy_map_chart_url, generate_pie_chart_source_popn, generate_trophy_freq_chart_url
-
 
 #-----------------------------------------------------------
 #   home
@@ -290,18 +289,17 @@ def search_view(request, **kwargs):
             show_all = True
         else:
             quoted_search_term = quote(search_term)
-            print "search term: ", search_term
-            print "quoted search term: ", quoted_search_term
+            #print "search term: ", search_term
+            #print "quoted search term: ", quoted_search_term
    
     # either show all or carry out search
-    print "show all = {0}".format(show_all)
+    #print "show all = {0}".format(show_all)
     if show_all:
         form = None
         qset = FedRegDoc.objects.all().order_by('-publication_date')
         print qset.count()
     else:
         if search_term:
-            print "searching for ", search_term
             qset = FedRegDoc.objects.filter(html_full_text__icontains=search_term).order_by('-publication_date')
         else:
             qset=None
@@ -328,7 +326,7 @@ def search_view(request, **kwargs):
     else:
         print "qset empty in search"
 
-    print "display_page {0}".format(display_page)
+    #print "display_page {0}".format(display_page)
 
     return render_to_response('search.html', {'display_qset':display_qset, 'display_page':display_page, 'num_per_page':num_per_page, 'search_term':search_term, 'quoted_search_term':quoted_search_term, 'total_records':total_records, 'total_pages':total_pages, 'page_range':page_range, 'form':form, 'display_offset':display_offset}, context_instance=RequestContext(request))
 

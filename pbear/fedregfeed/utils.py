@@ -1,12 +1,9 @@
 from django.contrib.syndication.views import Feed
 from fedregfeed.models import FedRegDoc, Agency, BlogPost, BlogAuthor
-
-from urllib2 import urlopen, quote
-import json
-import datetime
-import re
-
 from myconstants import STATE_DICT, STOP_WORDS
+from urllib2 import urlopen, quote
+import json, datetime, re, pylibmc, os
+
 
 #------------------------------
 # regularize popn names for trophy view
@@ -232,22 +229,22 @@ def abbrev_state_name_from_full(state):
             break
     return new_state
 
-#-----------------------------------------------------------
+#---------------------------------------------------------------------
 #      polar bear search
 #      should return a list of matching primary keys to FedRegDocs
-#-----------------------------------------------------------
+#---------------------------------------------------------------------
 def polar_bear_search(regex):
-
+    ''''''
+    
     matching_docs = []
     
     search_re = re.compile(regex, re.DOTALL)
-
     for d in FedRegDoc.objects.all():
         if d.html_fulltext:
             if search_re.search(d.html_full_text): 
                 #print "found match in polar_bear_search for doc.pk:", d.pk  
                 matching_docs.append(d.pk)
-
+                
     return matching_docs
     
 
