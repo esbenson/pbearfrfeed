@@ -305,7 +305,7 @@ def search_view(request, **kwargs):
         else:
             qset=None
     if qset:
-        print "calculating pages"
+        #print "calculating pages"
         total_records = qset.count()
         if total_records != 0:
             total_pages = total_records / num_per_page
@@ -314,7 +314,7 @@ def search_view(request, **kwargs):
             page_range = range(1, total_pages + 1)
             display_offset = (display_page - 1) * num_per_page 
             if display_offset < total_records:
-                print display_offset, num_per_page, total_records
+                #print display_offset, num_per_page, total_records
                 if display_offset + num_per_page >= total_records:
                     display_qset = qset[display_offset:total_records]
                     #print "a display_qset.count()={0}".format(display_qset.count())
@@ -404,4 +404,7 @@ def blog_single_view(request, **kwargs):
 #                print "URLError when opening ", d.html_url
 #                
 #    return render_to_response('add_html_full_text.html', {}, context_instance=RequestContext(request))
-    
+
+
+
+
