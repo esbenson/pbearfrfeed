@@ -2,7 +2,8 @@ from django.contrib.syndication.views import Feed
 from fedregfeed.models import FedRegDoc, Agency, BlogPost, BlogAuthor
 from myconstants import STATE_DICT, STOP_WORDS
 from urllib2 import urlopen, quote
-import json, datetime, re, pylibmc, os
+import json, datetime, re
+#import pylibmc, os
 
 
 #------------------------------
