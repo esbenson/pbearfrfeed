@@ -1,4 +1,4 @@
-import pylibmc
+#import pylibmc
 
 # Django settings for pbear project.
 
@@ -22,13 +22,13 @@ DATABASES = {
     }
 }
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django_pylibmc.memcached.PyLibMCCache'
-    }
-}
-CACHE_MIDDLEWARE_SECONDS = 300
-CACHE_MIDDLEWARE_KEY_PREFIX = 'polarbearfeed'
+#CACHES = {
+#    'default': {
+#        'BACKEND': 'django_pylibmc.memcached.PyLibMCCache'
+#    }
+#}
+#CACHE_MIDDLEWARE_SECONDS = 300
+#CACHE_MIDDLEWARE_KEY_PREFIX = 'polarbearfeed'
 
 
 # Local time zone for this installation. Choices can be found here:
@@ -105,13 +105,13 @@ TEMPLATE_LOADERS = (
 )
 
 MIDDLEWARE_CLASSES = (
-    'django.middleware.cache.UpdateCacheMiddleware',
+#    'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
+#   'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+#    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware',
+#    'django.middleware.cache.FetchFromCacheMiddleware',
 )
 
 ROOT_URLCONF = 'pbear.urls'
