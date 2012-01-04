@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import patterns, include, url
 from utils import FRFeed, BlogFeed
+from django.views.generic import TemplateView
 
 #------------------- number to display on list page 
 display_num=20
@@ -23,6 +24,7 @@ urlpatterns = patterns('fedregfeed.views',
     url(r'^blog/(?P<display_page>\d+)/$', 'blog_list_view', {}, name='blog_list_view_page'),
     url(r'^blog/$', 'blog_list_view', {}),
     url(r'^blog/detail/(?P<post_pk>\d+)/$', 'blog_single_view', {}, name='blog_single_view'),
+    url(r'^about/$', TemplateView.as_view(template_name='about.html')),
     )
 
 #------------------------------------------
