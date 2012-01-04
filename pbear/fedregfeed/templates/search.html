@@ -47,6 +47,8 @@ Polar Bear Feed
                     <tr><td width="30" style="font-weight:bold">{{display_offset|add:forloop.counter0|add:"1"}}</td><td width="100"><span class="doc_date" >{{doc.publication_date}}</span></td><td><span class="doc_title" style="font-weight:normal;"><a href="{% url pbear_detail_pk_search doc_pk=doc.pk search_term=search_term display_page=display_page %}" style="text-decoration:none">{{doc.title}}</a></span></td></tr>  
             {% endfor %}
             </table>
+            
+        <div style="text-align:center"><p>{% if display_page > 1 %} <a href="{% url pbear_search_term_page search_term=quoted_search_term display_page=display_page|add:"-1"  %}">previous page</a>{% endif %}{% if display_page < total_pages %} <a href="{% url pbear_search_term_page search_term=quoted_search_term display_page=display_page|add:"1" %}">next page</a>{% endif %}</p></div>
         </div>
     {% else %}
         {% if search_term %}

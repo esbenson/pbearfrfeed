@@ -37,44 +37,11 @@
 {% block content %}
         <div style="width:600px; text-align:left;margin-left:auto;margin-right:auto">
         {% if doc_list %}            
-            {% load comments %}
-
-            {% for doc in doc_list %}
-            
+            {% for doc in doc_list %}        
             <p><span class="doc_date" >{{doc.publication_date}}</span>
-                 <span class="doc_title" style="font-weight:normal;" ><a href="{% url pbear_detail_pk doc_pk=doc.pk %}" style="text-decoration:none">{{doc.title}}</a></span></p>  
-                 
-                 <!--
-                 <span class="doc_type">{{doc.document_type}}</span> &bull;  
-                 <span class="doc_agency">
-                 {% for a in doc.agencies.all %}
-                    {% if a.name %}
-                        {{a.name}}
-                        {% if a.url %}<a href="{{a.url}}" target="_blank">&rArr;</a>
-                        {% else %}
-                       {% endif %}
-                     {% else %}
-                       {{a.raw_name}}
-                       {% if a.url %}
-                            <a href="{{a.url}}" target="_blank">&rArr;</a>
-                       {% endif %}
-                     {% endif %}
-                    {% endfor %}
-                 &bull; <span class="doc_fulltext">Full text:{% if doc.html_url %} 
-                  </span>
-                     HTML<a href="{{doc.html_url}}" target=_blank>&rArr;</a>
-                    {% endif %}
-                    {% if doc.pdf_url %}
-                         PDF<a href="{{doc.pdf_url}}" target=_blank>&rArr;</a>
-                    {% endif %}
-
-                    </span>
-            {% get_comment_count for doc as comment_count %}
-                 &bull; <span class="doc_comments_heading">Comments: {{comment_count}}</span>
-               </p>
-            -->
-            
+                 <span class="doc_title" style="font-weight:normal;" ><a href="{% url pbear_detail_pk doc_pk=doc.pk %}" style="text-decoration:none">{{doc.title}}</a></span></p>         
             {% endfor %}
+
             
         {% else %}
             <p>nothing found</p>

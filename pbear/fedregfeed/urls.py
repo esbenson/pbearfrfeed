@@ -2,7 +2,7 @@ from django.conf.urls.defaults import patterns, include, url
 from utils import FRFeed, BlogFeed
 
 #------------------- number to display on list page 
-display_num=10
+display_num=20
 
 #------------------------------------------
 #      basic views
@@ -14,12 +14,12 @@ urlpatterns = patterns('fedregfeed.views',
     url(r'^detail/(?P<doc_pk>\d+)/(?P<search_term>.+)/(?P<display_page>\d+)/$', 'detail_view', name='pbear_detail_pk_search'), #detail
     url(r'^visualizations/$', 'vis_view', name='pbear_vis'), # visualizations
     url(r'^$', 'home_view', {'update_database_flag':True, 'search_term':r'"polar bear"|"polar bears"'}, name='pbear_home'), # home
-    url(r'^search/(?P<search_term>.+)/(?P<display_page>\d+)/$', 'search_view', {'num_per_page':10}, name='pbear_search_term_page'), 
-    url(r'^search/(?P<search_term>.+)/$', 'search_view', {'num_per_page':10}, name='pbear_search_term'), 
-    url(r'^search/$', 'search_view', {'num_per_page':10, 'display_page': 1}, name='pbear_search_default'),
-    url(r'^search/$', 'search_view', {}, name='pbear_search_no_args'), 
-    url(r'^browse/(?P<display_page>\d+)/$', 'search_view', {'show_all':True}, name='pbear_browse_page'),
-    url(r'^browse/$', 'search_view', {'show_all':True}, name='pbear_browse'),
+    url(r'^search/(?P<search_term>.+)/(?P<display_page>\d+)/$', 'search_view', {'num_per_page':display_num}, name='pbear_search_term_page'), 
+    url(r'^search/(?P<search_term>.+)/$', 'search_view', {'num_per_page':display_num}, name='pbear_search_term'), 
+    url(r'^search/$', 'search_view', {'num_per_page':display_num, 'display_page': 1}, name='pbear_search_default'),
+    url(r'^search/$', 'search_view', {'num_per_page':display_num}, name='pbear_search_no_args'), 
+    url(r'^browse/(?P<display_page>\d+)/$', 'search_view', {'show_all':True, 'num_per_page':display_num}, name='pbear_browse_page'),
+    url(r'^browse/$', 'search_view', {'show_all':True, 'num_per_page':display_num}, name='pbear_browse'),
     url(r'^blog/(?P<display_page>\d+)/$', 'blog_list_view', {}, name='blog_list_view_page'),
     url(r'^blog/$', 'blog_list_view', {}),
     url(r'^blog/detail/(?P<post_pk>\d+)/$', 'blog_single_view', {}, name='blog_single_view'),

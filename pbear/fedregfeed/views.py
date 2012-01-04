@@ -248,6 +248,26 @@ def search_view(request, **kwargs):
     page_range = []
     show_all = False
 
+    try:
+        num_per_page=int(kwargs['num_per_page'])
+    except:
+        num_per_page=default_num_per_page
+    try:
+        display_page=int(kwargs['display_page'])
+        if display_page < 1:
+            raise Http404
+    except:
+        display_page=default_display_page
+    try:
+        show_all = kwargs['show_all']
+    except:
+        show_all = False
+    if not search_term:
+        try:
+            search_term = kwargs['search_term']
+        except:
+            search_term = None
+                
     # if result of search form submission, process form parameter
     if request.method == 'POST':
         print "in post"
@@ -255,8 +275,6 @@ def search_view(request, **kwargs):
         if form.is_valid():
             print "form is valid"
             search_term = unquote(form.cleaned_data['search_term'])
-            display_page = default_display_page
-            num_per_page = default_num_per_page
             show_all = False
         else:
             print "form is not valid"
@@ -264,25 +282,7 @@ def search_view(request, **kwargs):
     # if NOT result of form submission, get args & set up form for display
     else:
         form = SearchForm()
-        try:
-            num_per_page=int(kwargs['num_per_page'])
-        except:
-            num_per_page=default_num_per_page
-        try:
-            display_page=int(kwargs['display_page'])
-            if display_page < 1:
-                raise Http404
-        except:
-            display_page=default_display_page
-        try:
-            show_all = kwargs['show_all']
-        except:
-            show_all = False
-        if not search_term:
-            try:
-                search_term = kwargs['search_term']
-            except:
-                search_term = None
+
     if search_term:
         search_term = search_term.strip()
         if search_term == 'None':
