@@ -5,3 +5,4 @@ pygooglechart==0.2.1
 Markdown==2.1.0
 pylibmc==1.2.2
 django-pylibmc-sasl==0.2.4
+whoosh==2.3.2
