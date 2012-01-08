@@ -5,7 +5,7 @@
 
     <div style="margin:10px;text-align:center;width:600px;margin-right:auto;margin-left:auto;">
         <h2 style="margin-bottom:0px;">{{post.title}}</h2>
-        <em>posted by {% if post.author.url %}<a href="{{post.author.url}}" target="_blank">{% endif %}{{post.author.name}}{% if post.author.url %}</a>{% endif %} at {{post.datetime}}</em>
+        <em>{{post.datetime}}</em>
     </div>
     <div style="margin:10px;text-align:left;width:600px;margin-right:auto;margin-left:auto;">
         <p>{{post.content|markdown}}</p>
