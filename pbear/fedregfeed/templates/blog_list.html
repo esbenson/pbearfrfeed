@@ -7,10 +7,10 @@
     {% for p in posts_to_display %} 
     <div style="margin:10px;text-align:center;width:600px;margin-right:auto;margin-left:auto;">
         <a href="{% url blog_single_view post_pk=p.pk %}" style="text-decoration:none"><h2 style="margin-bottom:0px;">{{p.title}}</h2></a>
-        <em>posted by {% if p.author.url %}<a href="{{p.author.url}}" target="_blank">{% endif %}{{p.author.name}}{% if p.author.url %}</a>{% endif %} at {{p.datetime}}</em>
+        <em><!-- posted by {% if p.author.url %}<a href="{{p.author.url}}" target="_blank">{% endif %}{{p.author.name}}{% if p.author.url %}</a>{% endif %} at -->{{p.datetime}}</em>
     </div>
     <div style="margin:10px;text-align:left;width:600px;margin-right:auto;margin-left:auto;">
-        <p>{% if p.content|length > excerpt_length %}{{p.content|slice:excerpt_slice|add:" ... "|markdown}} <div style="text-align:right;"><a href="{% url blog_single_view post_pk=p.pk %}">read more</a></div>{% else %}{{p.content}}{% endif %}</p>
+        <p><{% if p.content|length > excerpt_length %}{{p.content|slice:excerpt_slice|add:" ... "|markdown}} <div style="text-align:right;"><a href="{% url blog_single_view post_pk=p.pk %}">read more</a></div>{% else %}{{p.content}}{% endif %}</p>
     </div>
     {% endfor %}
     {% if more_flag %} 
