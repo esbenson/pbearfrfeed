@@ -268,12 +268,13 @@ def blog_list_view(request, **kwargs):
     try:
         num_per_page = int(kwargs['num_per_page'])
     except:
-        num_per_page = 10       
+        num_per_page = 10
     try:
         excerpt_length = int(kwargs['excerpt_length'])
     except:
-        excerpt_length = 300
-        
+        excerpt_length = 500
+    excerpt_slice = "0:" + str(excerpt_length)
+    
     posts = BlogPost.objects.all().order_by('-datetime')
     total_posts = posts.count()
     display_offset = (display_page - 1) * num_per_page
@@ -287,7 +288,9 @@ def blog_list_view(request, **kwargs):
         else:
             more_flag = False
 
-    return render_to_response('blog_list.html', {'posts_to_display':posts_to_display, 'total_posts':total_posts, 'display_page':display_page, 'num_per_page':num_per_page, 'excerpt_length':excerpt_length, 'more_flag':more_flag}, context_instance=RequestContext(request))
+
+
+    return render_to_response('blog_list.html', {'posts_to_display':posts_to_display, 'total_posts':total_posts, 'display_page':display_page, 'num_per_page':num_per_page, 'excerpt_length':excerpt_length, 'excerpt_slice':excerpt_slice, 'more_flag':more_flag}, context_instance=RequestContext(request))
 
 
 # ------------------------------------------------
