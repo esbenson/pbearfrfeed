@@ -104,9 +104,6 @@ def detail_view(request, **kwargs):
         fulltext = doc.body_html_full_text
         if fulltext:
             fulltext = re.sub(r'<h3>Full text</h3>', '', fulltext) 
-#except:
-#        print "failure loading xml_full_text as html"
-#        fulltext = None 
     
     # render page
     return render_to_response('detail.html', {"doc":doc, 'show_all':show_all, 'search_term':search_term, 'display_page':display_page, 'fulltext':fulltext}, context_instance=RequestContext(request))
@@ -316,36 +313,4 @@ def blog_single_view(request, **kwargs):
 
     return render_to_response('blog_single.html', {'post':post}, context_instance=RequestContext(request))
 
-
-# ------------------------------------------------
-def add_xml_full_text_to_all(request):
-    for d in FedRegDoc.objects.all():
-        print d.title,
-        if not d.xml_full_text:
-            try:
-                f=urlopen(d.json_url)
-                jsondata=f.read()
-                f.close()
-                page = json.loads(jsondata)
-                full_text_xml_url=page['full_text_xml_url']
-                body_html_url=page['body_html_url']
-                print "... xml url:{0}".format(full_text_xml_url)
-                try:
-                    f=urlopen(full_text_xml_url)
-                    d.xml_full_text=f.read()                
-                    f.close()
-                except:
-                    d.xml_full_text = None
-                    try:
-                        f=urlopen(body_html_url)
-                        d.body_html_full_text=f.read()                
-                        f.close()
-                    except:
-                        d.body_html_full_text=None
-                d.save()
-                print "... success"
-            except:
-                print "... error", d.json_url
-                
-    return render_to_response('add_xml.html', {}, context_instance=RequestContext(request))
 

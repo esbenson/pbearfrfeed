@@ -1,5 +1,37 @@
 
 
+# ------------------------------------------------
+def add_xml_full_text_to_all(request):
+    for d in FedRegDoc.objects.all():
+        print d.title,
+        if not d.xml_full_text:
+            try:
+                f=urlopen(d.json_url)
+                jsondata=f.read()
+                f.close()
+                page = json.loads(jsondata)
+                full_text_xml_url=page['full_text_xml_url']
+                body_html_url=page['body_html_url']
+                print "... xml url:{0}".format(full_text_xml_url)
+                try:
+                    f=urlopen(full_text_xml_url)
+                    d.xml_full_text=f.read()                
+                    f.close()
+                except:
+                    d.xml_full_text = None
+                    try:
+                        f=urlopen(body_html_url)
+                        d.body_html_full_text=f.read()                
+                        f.close()
+                    except:
+                        d.body_html_full_text=None
+                d.save()
+                print "... success"
+            except:
+                print "... error", d.json_url
+                
+    return render_to_response('add_xml.html', {}, context_instance=RequestContext(request))
+
 # --------------------------------------------------------------------------------------------------------------
 #     list
 #

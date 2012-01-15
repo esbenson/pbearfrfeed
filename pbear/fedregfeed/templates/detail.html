@@ -28,11 +28,11 @@
              <span class="doc_agency">
              {% for a in doc.agencies.all %}
                     {% if a.name %}
-                        {{a.name}}
+                        {{a.name}}{% if not forloop.last %}; {% endif%}
                     {% else %}
-                       {{a.raw_name}}
+                       {{a.raw_name}}{% if not forloop.last %}; {% endif%}
                      {% endif %}
-                     {% if not forloop.last %}, {% endif%}
+                     
                 {% endfor %}
               </span>      
             </p></div>
