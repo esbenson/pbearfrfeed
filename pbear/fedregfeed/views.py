@@ -97,13 +97,13 @@ def detail_view(request, **kwargs):
         raise Http404
 
     # fulltext conversion
-#    try:
     if doc.xml_full_text:
         fulltext = fr_xml_to_html(doc.xml_full_text)
     else:
         print "using body html text"
         fulltext = doc.body_html_full_text
-        fulltext = re.sub(r'<h3>Full text</h3>', '', fulltext) 
+        if fulltext:
+            fulltext = re.sub(r'<h3>Full text</h3>', '', fulltext) 
 #except:
 #        print "failure loading xml_full_text as html"
 #        fulltext = None 
