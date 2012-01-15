@@ -6,8 +6,8 @@
 
 
 {% block nav %}
-<div style="text-align:left;font-style:normal;margin:10px;margin-left:auto; margin-right:auto;width:600px">
-<p>Currently only summaries/abstracts of individual items are available here (although the full text is used to generate search results). For more details, click on the &rArr; links to go to the official <a href="http://www.federalregister.gov" target="_blank">Federal Register</a> site.</p></div> 
+<!--<div style="text-align:left;font-style:normal;margin:10px;margin-left:auto; margin-right:auto;width:600px">
+<p>Currently only summaries/abstracts of individual items are available here (although the full text is used to generate search results). For more details, click on the &rArr; links to go to the official <a href="http://www.federalregister.gov" target="_blank">Federal Register</a> site.</p></div>-->
 
 <div style="text-align:center;margin:10px;"><p>
 {% if search_term %}
@@ -19,41 +19,44 @@
 {% block content %}
 
         <div style="margin-left:auto;margin-right:auto;width:500px;text-align:left;">
-    {% if doc %}
-        
+    {% if doc %}        
          <div style="text-align:center;margin-top:20px;"><p class = "doc_data">
-                <span class="doc_date">{{doc.publication_date}}</span><br/>
-             <span class="doc_title" style="font-size:14px;font-weight:bold;" >{{doc.title}}</span> <br/> 
-             <span class="doc_type">{{doc.document_type}}</span> &bull;  
+             <h2>{{doc.title}}</h2>
+             <span class="doc_date">{{doc.publication_date}}</span><br/>
+             <span class="doc_type">{{doc.document_type}}</span><br/>
+             FR Doc #: {{doc.document_number}}<br/>
              <span class="doc_agency">
              {% for a in doc.agencies.all %}
-                {% if a.name %}
-                    {{a.name}}
-                    {% if a.url %}<a href="{{a.url}}" target="_blank" style="text-decoration:none">&rArr;</a>
+                    {% if a.name %}
+                        {{a.name}}
                     {% else %}
-                   {% endif %}
-                 {% else %}
-                   {{a.raw_name}}
-                   {% if a.url %}
-                        <a href="{{a.url}}" target="_blank" style="text-decoration:none">&rArr;</a>
-                   {% endif %}
-                 {% endif %}
+                       {{a.raw_name}}
+                     {% endif %}
+                     {% if not forloop.last %}, {% endif%}
                 {% endfor %}
-              </span>
-            &bull; <span class="doc_fulltext"> Full text:{% if doc.html_url %}
-                 HTML<a href="{{doc.html_url}}" target="_blank" style="text-decoration:none">&rArr;</a>
-                {% endif %}
-                {% if doc.pdf_url %}
-                     PDF<a href="{{doc.pdf_url}}" target="_blank" style="text-decoration:none">&rArr;</a>
-                {% endif %}
-
-                </span>
+              </span>      
             </p></div>
            
-            <P class="doc_abstract"><span style="font-weight:bold">Summary</span>: {{ doc.abstract }}</p>
+<h3 style="text-align:center">Summary</h3>
+            <P class="doc_abstract">{{ doc.abstract }}</p>
     {% else %}
         <p>no doc defined</p>
     {% endif %}
+
+        <div><h3 style="text-align:center">Full text</h3> 
+                {% if fulltext %}
+                        {{fulltext|safe}}
+                    {% else %} 
+                        At <a href="http://www.federalregister.gov/" target="_blank">FederalRegister.gov</a>: 
+                         {% if doc.html_url %}
+                     <span class="doc_fulltext">HTML<a href="{{doc.html_url}}" target="_blank" style="text-decoration:none">&rArr;</a></span>
+                        {% endif %}
+                        {% if doc.pdf_url %}
+                             PDF<a href="{{doc.pdf_url}}" target="_blank" style="text-decoration:none">&rArr;</a>
+                        {% endif %}         
+                {% endif %}
+                </div>
+
         </div>
 
 {% endblock content %}

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.comments.moderation import CommentModerator, moderator
     
+#--------------------------------------------------------------------
 class Agency(models.Model):
     url=models.CharField(max_length=200, null=True, blank=True)
     json_url=models.CharField(max_length=200, null=True, blank=True)
@@ -14,6 +15,7 @@ class Agency(models.Model):
         else:
             return self.raw_name
 
+#--------------------------------------------------------------------
 class FedRegDoc(models.Model):
     document_type=models.CharField(max_length=50, null=True, blank=True)
     document_number=models.CharField(max_length=50, null=True, blank=True)
@@ -26,12 +28,13 @@ class FedRegDoc(models.Model):
     html_url=models.CharField(max_length=200, null=True, blank=True)
     pdf_url=models.CharField(max_length=200, null=True, blank=True)
     html_full_text = models.TextField(null=True, blank=True)
-    # add field for pdf binary?
+    xml_full_text = models.TextField(null=True, blank=True)
+    body_html_full_text = models.TextField(null=True, blank=True)
 
     def __unicode__(self):
         return self.title
 
-
+#--------------------------------------------------------------------
 class BlogAuthor(models.Model):
     name=models.CharField(max_length=200)
     email=models.EmailField(blank=True)
@@ -40,6 +43,7 @@ class BlogAuthor(models.Model):
     def __unicode__(self):
         return self.name
 
+#--------------------------------------------------------------------
 class BlogPost(models.Model):
     datetime=models.DateTimeField()
     title=models.CharField(max_length=200)
@@ -50,11 +54,9 @@ class BlogPost(models.Model):
     def __unicode__(self):
         return self.title
 
+#--------------------------------------------------------------------
 class BlogPostModerator(CommentModerator):
     email_notification = False
-    #   auto_close_field   = 'posted_date'
-    # Close the comments after 7 days.
-    #  close_after        = 7
 
 moderator.register(BlogPost, BlogPostModerator)
 

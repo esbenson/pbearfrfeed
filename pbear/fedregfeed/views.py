@@ -9,7 +9,7 @@ import re, json, datetime
 #import pylibmc, os
 
 from fedregfeed.models import FedRegDoc, BlogPost
-from utils import update_database_from_fedreg, full_state_name_from_abbrev, abbrev_state_name_from_full, regularize_population_name, extract_trophy_records_from_local, google_geocode
+from utils import update_database_from_fedreg, full_state_name_from_abbrev, abbrev_state_name_from_full, regularize_population_name, extract_trophy_records_from_local, google_geocode, fr_xml_to_html
 from charts import generate_freq_chart_url_from_fedreg, generate_freq_chart_url_from_qset, generate_bar_chart_by_agency_from_local, generate_trophy_map_chart_url, generate_pie_chart_source_popn, generate_trophy_freq_chart_url
 
 
@@ -95,9 +95,21 @@ def detail_view(request, **kwargs):
         doc = FedRegDoc.objects.get(pk=doc_pk)
     except:
         raise Http404
-      
+
+    # fulltext conversion
+#    try:
+    if doc.xml_full_text:
+        fulltext = fr_xml_to_html(doc.xml_full_text)
+    else:
+        print "using body html text"
+        fulltext = doc.body_html_full_text
+        fulltext = re.sub(r'<h3>Full text</h3>', '', fulltext) 
+#except:
+#        print "failure loading xml_full_text as html"
+#        fulltext = None 
+    
     # render page
-    return render_to_response('detail.html', {"doc":doc, 'show_all':show_all, 'search_term':search_term, 'display_page':display_page}, context_instance=RequestContext(request))
+    return render_to_response('detail.html', {"doc":doc, 'show_all':show_all, 'search_term':search_term, 'display_page':display_page, 'fulltext':fulltext}, context_instance=RequestContext(request))
 
         
 # --------------------------------------------
@@ -288,8 +300,6 @@ def blog_list_view(request, **kwargs):
         else:
             more_flag = False
 
-
-
     return render_to_response('blog_list.html', {'posts_to_display':posts_to_display, 'total_posts':total_posts, 'display_page':display_page, 'num_per_page':num_per_page, 'excerpt_length':excerpt_length, 'excerpt_slice':excerpt_slice, 'more_flag':more_flag}, context_instance=RequestContext(request))
 
 
@@ -297,16 +307,45 @@ def blog_list_view(request, **kwargs):
 # blog single-post view
 # ------------------------------------------------
 def blog_single_view(request, **kwargs):
-
     try:
         post_pk = int(kwargs['post_pk'])
     except:
         print 'no post_pk given'
         raise Http404
-
     post = BlogPost.objects.get(pk=post_pk)
 
     return render_to_response('blog_single.html', {'post':post}, context_instance=RequestContext(request))
 
 
+# ------------------------------------------------
+def add_xml_full_text_to_all(request):
+    for d in FedRegDoc.objects.all():
+        print d.title,
+        if not d.xml_full_text:
+            try:
+                f=urlopen(d.json_url)
+                jsondata=f.read()
+                f.close()
+                page = json.loads(jsondata)
+                full_text_xml_url=page['full_text_xml_url']
+                body_html_url=page['body_html_url']
+                print "... xml url:{0}".format(full_text_xml_url)
+                try:
+                    f=urlopen(full_text_xml_url)
+                    d.xml_full_text=f.read()                
+                    f.close()
+                except:
+                    d.xml_full_text = None
+                    try:
+                        f=urlopen(body_html_url)
+                        d.body_html_full_text=f.read()                
+                        f.close()
+                    except:
+                        d.body_html_full_text=None
+                d.save()
+                print "... success"
+            except:
+                print "... error", d.json_url
+                
+    return render_to_response('add_xml.html', {}, context_instance=RequestContext(request))
 

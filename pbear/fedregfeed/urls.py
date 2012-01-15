@@ -23,6 +23,7 @@ urlpatterns = patterns('fedregfeed.views',
     url(r'^about/$', TemplateView.as_view(template_name='about.html')),
     url(r'^visualizations/$', 'vis_view', name='pbear_vis'), # visualizations
     url(r'^$', 'home_view', {'update_database_flag':True, 'search_term':r'"polar bear"|"polar bears"'}, name='pbear_home'), # home
+    url(r'^add_xml/$', 'add_xml_full_text_to_all'),
    )
 
 #------------------------------------------

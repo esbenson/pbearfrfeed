@@ -33,6 +33,61 @@ def regularize_population_name(popn):
         popn = 'Norwegian Bay'
 
     return popn
+
+# -----------------------------------------------------------      
+#   convert xml full text to html      
+# -----------------------------------------------------------      
+def fr_xml_to_html(xmltext):
+    ''' '''
+    
+    w = xmltext
+
+    #sections
+    w = re.sub(r'<PREAMBLE>(?P<contents>[\s\S]*?)</PREAMBLE>', r'<div class="preamble">\g<contents></div>', w)
+    w = re.sub(r'<SIG>(?P<contents>[\s\S]*?)</SIG>', r'<div class="sig">\g<contents></div>', w)
+    w = re.sub(r'<SUPLINF>(?P<contents>[\s\S]*?)</SUPLINF>', r'<div class="suplinf">\g<contents></div>', w)
+    w = re.sub(r'<AGY>(?P<contents>[\s\S]*?)</AGY>', r'<div class="agy">\g<contents></div>', w)
+    w = re.sub(r'<ACT>(?P<contents>[\s\S]*?)</ACT>', r'<div class="act">\g<contents></div>', w)
+    w = re.sub(r'<DATES>(?P<contents>[\s\S]*?)</DATES>', r'<div class="dates">\g<contents></div>', w)
+    w = re.sub(r'<SUM>(?P<contents>[\s\S]*?)</SUM>', r'<div class="sum">\g<contents></div>', w)
+    w = re.sub(r'<ADD>(?P<contents>[\s\S]*?)</ADD>', r'<div class="add">\g<contents></div>', w)
+    w = re.sub(r'<FURINF>(?P<contents>[\s\S]*?)</FURINF>', r'<div class="furinf">\g<contents></div>', w)
+    w = re.sub(r'<EXTRACT>(?P<contents>[\s\S]*?)</EXTRACT>', r'<div class="extract">\g<contents></div>', w)
+    #formatting
+    w = re.sub(r'<AGENCY TYPE=\"(?P<type>\w+)\">(?P<contents>[\s\S]*?)</AGENCY>', r'<span class="agency" class="type\g<type>">\g<contents></span>', w)
+    w = re.sub(r'<SUBAGY>(?P<contents>[\s\S]*?)</SUBAGY>', r'<span class="subagy">\g<contents></span>', w)
+    w = re.sub(r'<RIN>(?P<contents>[\s\S]*?)</RIN>', r'<span class="rin">\g<contents></span>', w)
+    w = re.sub(r'<SUBJECT>(?P<contents>[\s\S]*?)</SUBJECT>', r'<span class="subject">\g<contents></span>', w)    
+    w = re.sub(r'<HD SOURCE=\"HED\">(?P<contents>[\s\S]*?)</HD>', r'<span class="hed">\g<contents></span>', w)
+    w = re.sub(r'<HD SOURCE=\"HD1\">(?P<contents>[\s\S]*?)</HD>', r'<span class="hd1">\g<contents></span>', w)
+    w = re.sub(r'<HD SOURCE=\"HD2\">(?P<contents>[\s\S]*?)</HD>', r'<span class="hd2">\g<contents></span>', w)
+    w = re.sub(r'<HD SOURCE=\"HD3\">(?P<contents>[\s\S]*?)</HD>', r'<span class="hd3">\g<contents></span>', w)
+    w = re.sub(r'<DATED>(?P<contents>[\s\S]*?)</DATED>', r'<span class="dated">\g<contents></span>', w)
+    w = re.sub(r'<NAME>(?P<contents>[\s\S]*?)</NAME>', r'<span class="name">\g<contents></span>', w)
+    w = re.sub(r'<TITLE>(?P<contents>[\s\S]*?)</TITLE>', r'<span class="title">\g<contents></span>', w)
+    w = re.sub(r'<E T=\"02\">(?P<contents>[\s\S]*?)</E>', r' <span class="E-02">\g<contents></span>', w)
+    w = re.sub(r'<E T=\"03\">(?P<contents>[\s\S]*?)</E>', r' <span class="E-03">\g<contents></span>', w)               
+    w = re.sub(r'<E T=\"04\">(?P<contents>[\s\S]*?)</E>', r' <span class="E-04">\g<contents></span>', w)               
+    w = re.sub(r'<FRDOC>(?P<contents>[\s\S]*?)</FRDOC>', r'<span class="frdoc">\g<contents></span>', w)
+    w = re.sub(r'<BILCOD>(?P<contents>[\s\S]*?)</BILCOD>', r'<span class="bilcod">\g<contents></span>', w)    
+    #page numbers
+    w = re.sub(r'<PRTPAGE P=\"(?P<contents>\d+)\"/>', r'<span class="prtpage"> [print page: \g<contents>] </span>', w)               
+    #images
+    w = re.sub(r'<GPH DEEP=\"(?P<gphdeep>\d+)\" SPAN=\"(?P<gphspan>\d+)\">(?P<contents>[\s\S]*?)</GPH>', r'<div class="\g<gphdeep>" class="\g<gphspan>">\g<contents></div>', w)
+    w = re.sub(r'<GID>(?P<gid>[\s\S]*?)</GID>', r'<a href="https://s3.amazonaws.com/images.federalregister.gov/\g<gid>/original.gif" target="_blank"><img src="https://s3.amazonaws.com/images.federalregister.gov/\g<gid>/large.gif"></a>', w)    
+
+    #tables
+    w = re.sub(r'<GPOTABLE[\"\w\s,=]+>(?P<contents>[\s\S]*?)</GPOTABLE>', r'<table border="1">\g<contents></table>', w)
+    w = re.sub(r'<TTITLE>(?P<contents>[\s\S]*?)</TTITLE>', r'<caption>\g<contents></caption>', w)
+    w = re.sub(r'<BOXHD>(?P<contents>[\s\S]*?)</BOXHD>', r'<thead>\g<contents></thead>', w)
+    w = re.sub(r'<CHED H=\"1\">(?P<contents>[\s\S]*?)</CHED>', r'<th>\g<contents></th>', w)
+    w = re.sub(r'<ROW([\"\w\s=,]+)?>(?P<contents>[\s\S]*?)</ROW>', r'<tr>\g<contents></tr>', w)             
+    w = re.sub(r'<ENT([\"\w\s=,]+)?>(?P<contents>[\s\S]*?)</ENT>', r'<td>\g<contents></td>', w)             
+         
+    htmltext = w
+    
+    return htmltext
+
         
 # -----------------------------------------------------------      
 #      for the RSS feed of FR items
