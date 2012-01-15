@@ -183,13 +183,39 @@ def add_object_to_database(d):
         
     # if a doc with this doc_number doesn't already exist in database, then add it, html_full_text, and agencies (if the agencies are new)
     if not FedRegDoc.objects.filter(document_number=obj.document_number):
-        # get full text as html
+
+        # get full text
         f = urlopen(obj.html_url)
         if f:
             obj.html_full_text = f.read()
         else:
             print "unable to open html url -", obj.html_url, "- in add_object_to_database"
         f.close()
+        try:
+            f=urlopen(obj.json_url)
+            jsondata=f.read()
+            f.close()
+            page = json.loads(jsondata)
+            full_text_xml_url=page['full_text_xml_url']
+            body_html_url=page['body_html_url']
+            print "... xml url:{0}".format(full_text_xml_url)
+            try:
+                f=urlopen(full_text_xml_url)
+                obj.xml_full_text=f.read()                
+                f.close()
+            except:
+                obj.xml_full_text = None
+                try:
+                    f=urlopen(body_html_url)
+                    obj.body_html_full_text=f.read()                
+                    f.close()
+                except:
+                    obj.body_html_full_text=None
+            obj.save()
+            print "... success"
+        except:
+            print "... error", obj.json_url
+
             
         # save object locally
         obj.save()
@@ -227,6 +253,7 @@ def add_object_to_database(d):
                     #print "multiple matching agency ids in database, selecting the first"
                     agency_to_add=Agency.objects.filter(agency_original_id=agency_to_add.agency_original_id)[0]
             obj.agencies.add(agency_to_add)  
+
                                   
     return True
                 
