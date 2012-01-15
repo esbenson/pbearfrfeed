@@ -36,6 +36,9 @@ def regularize_population_name(popn):
 
 # -----------------------------------------------------------      
 #   convert xml full text to html      
+#
+#      slow!
+#
 # -----------------------------------------------------------      
 def fr_xml_to_html(xmltext):
     ''' '''
@@ -357,7 +360,7 @@ def extract_trophy_records_from_local(google_geocode_flag):
         #print d.publication_date
         # following strips html tags (roughly), replace all whitespace with spaces, and deal with a couple of specific problems with source material
         # (if data is available as json, this would be a better place to start than the current approach)
-        full_text_stripped = strip_polar_bear_html(d.html_full_text)
+        full_text_stripped = correct_errors_in_trophy_source(strip_polar_bear_html(d.html_full_text))
         
         # checks for grouped applications in this doc
         grouped = trophy_grouped_re.search(full_text_stripped)
@@ -502,19 +505,24 @@ def google_geocode(address_string):
 #        clean up full text html so it's easier to 
 #        extract data from
 #
-#   a helper for show_trophy
+#   a helper for vis_view
 # ---------------------------------------------------
 def strip_polar_bear_html(html_full_text):
     # these are to roughly strip HTML tags and replace whitespace with a single space
     full_text_stripped = re.sub(r"<.*?>", " ", html_full_text)
     full_text_stripped = re.sub(r"\s+", " ", full_text_stripped)
+    full_text_stripped = re.sub(r"Back to Top", " ", full_text_stripped)
+
+    return full_text_stripped        
+
+
+def correct_errors_in_trophy_source(full_text):
+
+    full_text_stripped = full_text
 
     # these are to address specific problems with source text with trophies
-    full_text_stripped = re.sub(r"Back to Top", " ", full_text_stripped)
     full_text_stripped = re.sub(r"Lancaster Sound polar bear from the Lancaster Sound", "Lancaster Sound", full_text_stripped)
     full_text_stripped = re.sub(r"Northern Beaufort population polar bear population", "Northern Beaufort polar bear population", full_text_stripped)
-
-    # the following deal with one document with difficult table formatting 
     full_text_stripped = re.sub(r"Jerome Bofferding, Maple Grove,", "Jerome Bofferding, Maple Grove, MN...",  full_text_stripped)
     full_text_stripped = re.sub(r"Richard Haskins, Hillsborough,", "Richard Haskins, Hillsborough, CA...",  full_text_stripped)
     full_text_stripped = re.sub(r"Larry K. Bennett, Stewartstown,", "Larry K. Bennett, Stewartstown, PA...",  full_text_stripped)

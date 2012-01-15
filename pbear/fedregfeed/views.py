@@ -9,7 +9,7 @@ import re, json, datetime
 #import pylibmc, os
 
 from fedregfeed.models import FedRegDoc, BlogPost
-from utils import update_database_from_fedreg, full_state_name_from_abbrev, abbrev_state_name_from_full, regularize_population_name, extract_trophy_records_from_local, google_geocode, fr_xml_to_html
+from utils import update_database_from_fedreg, full_state_name_from_abbrev, abbrev_state_name_from_full, regularize_population_name, extract_trophy_records_from_local, google_geocode, fr_xml_to_html, correct_errors_in_trophy_source
 from charts import generate_freq_chart_url_from_fedreg, generate_freq_chart_url_from_qset, generate_bar_chart_by_agency_from_local, generate_trophy_map_chart_url, generate_pie_chart_source_popn, generate_trophy_freq_chart_url
 
 
