@@ -5,7 +5,7 @@
 
     <div style="margin:10px;text-align:center;width:600px;margin-right:auto;margin-left:auto;">
         <h2 style="margin-bottom:0px;">{{post.title}}</h2>
-        <em>{{post.datetime}}</em>
+        <em>posted by {{post.author.name}} at {{post.datetime}}</em>
     </div>
     <div style="margin:10px;text-align:left;width:600px;margin-right:auto;margin-left:auto;">
         <p>{{post.content|markdown}}</p>
