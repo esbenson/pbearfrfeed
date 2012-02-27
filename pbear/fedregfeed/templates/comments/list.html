@@ -1,7 +1,7 @@
 <dl id="comments">
   {% for comment in comment_list %}
     <dt id="c{{ comment.id }}">
-        <em>posted by {{ comment.name }} ({{comment.email}}) on {{ comment.submit_date }}</em>
+        <em>posted by {{ comment.name }} on {{ comment.submit_date }}</em>
     </dt>
     <dd>
         <p>{{ comment.comment }}</p>
